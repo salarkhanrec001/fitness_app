@@ -1,0 +1,13 @@
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.0.0
+Flask-Migrate>=4.0.0
+Flask-Login>=0.6.0
+Flask-Bcrypt>=1.0.1
+Flask-Caching>=2.0.0
+Flask-Limiter>=4.0.0
+Flask-Mail>=0.10.0
+Flask-WTF>=1.2.0
+python-dotenv>=1.0.0
+Pillow>=10.3.0
+google-generativeai>=0.8.0
+gunicorn>=23.0.0

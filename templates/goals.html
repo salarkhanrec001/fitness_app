@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}My Goals — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/goals.css') }}" />{% endblock %}
+{% block content %}
+<div class="goals-wrapper">
+  <h2 class="goals-title">🎯 My Goals</h2>
+
+  <!-- Create Goal -->
+  <section class="goals-section">
+    <h3 class="section-title">➕ Create New Goal</h3>
+    <form method="POST" action="{{ url_for('goals.create') }}" class="goal-form" id="goal-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-row">
+        <div class="form-group form-group--grow">
+          <label for="g-title" class="form-label">Goal Title *</label>
+          <input type="text" id="g-title" name="title" class="form-input" placeholder="e.g. Run 5km" required />
+        </div>
+        <div class="form-group">
+          <label for="g-category" class="form-label">Category</label>
+          <select id="g-category" name="category" class="form-input">
+            <option value="habit">Habit</option>
+            <option value="weight">Weight</option>
+            <option value="strength">Strength</option>
+            <option value="cardio">Cardio</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="g-description" class="form-label">Description</label>
+        <input type="text" id="g-description" name="description" class="form-input" placeholder="Optional details" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="g-current" class="form-label">Current Value</label>
+          <input type="number" id="g-current" name="current_value" class="form-input" placeholder="0" step="0.1" value="0" />
+        </div>
+        <div class="form-group">
+          <label for="g-target" class="form-label">Target Value</label>
+          <input type="number" id="g-target" name="target_value" class="form-input" placeholder="e.g. 5" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label for="g-unit" class="form-label">Unit</label>
+          <input type="text" id="g-unit" name="unit" class="form-input" placeholder="kg / km / reps" />
+        </div>
+        <div class="form-group">
+          <label for="g-deadline" class="form-label">Deadline & Time</label>
+          <input type="datetime-local" id="g-deadline" name="deadline" class="form-input" />
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">Create Goal 🎯</button>
+    </form>
+  </section>
+
+  <!-- Active Goals -->
+  <section class="goals-section">
+    <h3 class="section-title">⚡ Active Goals (<span id="active-count">{{ active_goals | length }}</span>)</h3>
+    <div id="active-goals-container">
+      {% if active_goals %}
+        <div class="goals-grid" id="active-goals-grid">
+          {% for goal in active_goals %}
+            <div class="goal-card" id="goal-{{ goal.id }}">
+              <div class="goal-card-header">
+                <span class="goal-category-badge goal-category--{{ goal.category }}">{{ goal.category }}</span>
+                <h4 class="goal-card-title">{{ goal.title }}</h4>
+              </div>
+              {% if goal.description %}
+                <p class="goal-card-desc">{{ goal.description }}</p>
+              {% endif %}
+              {% if goal.target_value %}
+                <div class="goal-card-progress">
+                  <div class="goal-progress-bar">
+                    <div class="goal-progress-fill" style="width: {{ goal.progress_percent }}%"></div>
+                  </div>
+                  <span class="goal-progress-label">{{ goal.current_value }} / {{ goal.target_value }} {{ goal.unit }} · {{ goal.progress_percent }}%</span>
+                </div>
+              {% endif %}
+              {% if goal.deadline %}
+                <p class="goal-deadline" data-deadline="{{ goal.deadline.isoformat() }}">
+                  ⏳ <span class="countdown-timer">Calculating...</span>
+                </p>
+              {% endif %}
+              <div class="goal-card-actions">
+                {% if goal.target_value %}
+                  <form method="POST" action="{{ url_for('goals.update', goal_id=goal.id) }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="number" name="current_value" class="form-input input-sm" value="{{ goal.current_value }}" step="0.1" />
+                    <button type="submit" class="btn-sm btn-secondary">Update</button>
+                  </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('goals.complete', goal_id=goal.id) }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button type="submit" class="btn-sm btn-success">✓ Complete</button>
+                </form>
+                <form method="POST" action="{{ url_for('goals.delete', goal_id=goal.id) }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Delete this goal?')">✕</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">🏁</div>
+          <h3 class="empty-state-title">Focus your ambition</h3>
+          <p class="empty-state-text">You haven't set any active goals yet. Use the form above to define your next target and stay accountable!</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Completed Goals -->
+  {% if completed_goals %}
+  <section class="goals-section">
+    <h3 class="section-title">🏆 Completed Goals ({{ completed_goals | length }})</h3>
+    <div class="goals-grid goals-grid--completed">
+      {% for goal in completed_goals %}
+        <div class="goal-card goal-card--done">
+          <span class="goal-done-badge">✅ Completed</span>
+          <h4 class="goal-card-title">{{ goal.title }}</h4>
+          {% if goal.completed_at %}
+            <small class="goal-deadline">{{ goal.completed_at.strftime('%b %d, %Y') }}</small>
+          {% endif %}
+          <form method="POST" action="{{ url_for('goals.delete', goal_id=goal.id) }}" style="margin-top:.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Delete?')">✕</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{{ url_for('static', filename='js/goals.js') }}"></script>{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Workout History — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/exercise.css') }}" />{% endblock %}
+{% block content %}
+<div class="exercise-wrapper">
+
+  <div class="exercise-hero">
+    <div>
+      <h1 class="exercise-hero-title">📅 Workout History</h1>
+      <p class="exercise-hero-sub">Your 12-week activity heatmap and personal bests</p>
+    </div>
+    <a href="{{ url_for('exercise.workout') }}" class="btn-secondary">← Back to Workout</a>
+  </div>
+
+  <!-- GitHub-style Heatmap -->
+  <section class="exercise-section">
+    <h2 class="section-title">🗓️ Activity Heatmap — Last 12 Weeks</h2>
+    <div class="heatmap-wrapper">
+      <div class="heatmap-grid" id="heatmap-grid">
+        {% for date_str, count in heatmap.items() %}
+          <div class="heatmap-cell heat-{{ [count, 4] | min }}"
+               title="{{ date_str }}: {{ count }} exercise{{ 's' if count != 1 else '' }} logged"
+               data-date="{{ date_str }}" data-count="{{ count }}">
+          </div>
+        {% endfor %}
+      </div>
+      <div class="heatmap-legend">
+        <span class="heatmap-legend-label">Less</span>
+        <div class="heatmap-cell heat-0"></div>
+        <div class="heatmap-cell heat-1"></div>
+        <div class="heatmap-cell heat-2"></div>
+        <div class="heatmap-cell heat-3"></div>
+        <div class="heatmap-cell heat-4"></div>
+        <span class="heatmap-legend-label">More</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Personal Bests -->
+  {% if personal_bests %}
+  <section class="exercise-section">
+    <h2 class="section-title">🏅 Personal Bests</h2>
+    <div class="pb-grid">
+      {% for exercise, weight in personal_bests.items() %}
+        <div class="pb-card">
+          <div class="pb-exercise">{{ exercise }}</div>
+          <div class="pb-weight">{{ weight }} <span>kg</span></div>
+          <div class="pb-label">Personal Best</div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Recent Logs -->
+  <section class="exercise-section">
+    <h2 class="section-title">📋 Recent Exercise Logs</h2>
+    {% if recent_logs %}
+      <div class="log-table-wrapper">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Exercise</th>
+              <th>Sets</th>
+              <th>Reps</th>
+              <th>Weight</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_logs %}
+              <tr>
+                <td>{{ log.logged_date.strftime('%b %d') }}</td>
+                <td><strong>{{ log.exercise_name }}</strong></td>
+                <td>{{ log.sets_done }}</td>
+                <td>{{ log.reps_done or '—' }}</td>
+                <td>{{ (log.weight_kg | string + ' kg') if log.weight_kg else '—' }}</td>
+                <td>{{ log.notes or '—' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="log-cards-mobile">
+        {% for log in recent_logs %}
+          <div class="log-card-mobile">
+            <div class="log-card-header">
+              <span class="log-card-ex">{{ log.exercise_name }}</span>
+              <span class="log-card-date">{{ log.logged_date.strftime('%b %d') }}</span>
+            </div>
+            <div class="log-card-stats">
+              <span><strong>{{ log.sets_done }}</strong> sets</span>
+              <span><strong>{{ log.reps_done or '—' }}</strong> reps</span>
+              <span><strong>{{ log.weight_kg or '—' }}</strong> kg</span>
+            </div>
+            {% if log.notes %}
+              <p class="log-card-notes">"{{ log.notes }}"</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3 class="empty-state-title">No workout history</h3>
+        <p class="empty-state-text">Every great journey starts with a single rep. Log your first session today and start building your legacy!</p>
+        <a href="{{ url_for('exercise.workout') }}" class="btn-primary">Start Your First Workout</a>
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tooltip on heatmap cells
+document.querySelectorAll('.heatmap-cell[data-date]').forEach(cell => {
+  cell.addEventListener('mouseenter', e => {
+    const tip = document.createElement('div');
+    tip.className = 'heatmap-tooltip';
+    tip.textContent = cell.title;
+    document.body.appendChild(tip);
+    const rect = cell.getBoundingClientRect();
+    tip.style.left = rect.left + window.scrollX + 'px';
+    tip.style.top  = rect.top  + window.scrollY - 36 + 'px';
+    cell._tip = tip;
+  });
+  cell.addEventListener('mouseleave', () => {
+    if (cell._tip) { cell._tip.remove(); cell._tip = null; }
+  });
+});
+</script>
+{% endblock %}

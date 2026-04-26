@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}{{ viewed_user.username }}'s Profile — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}" />{% endblock %}
+{% block content %}
+<div class="profile-wrapper">
+
+  <!-- Public profile banner -->
+  <div class="public-profile-hero">
+    <div class="public-hero-bg"></div>
+    <div class="public-hero-content">
+      <img
+        src="{{ url_for('static', filename='uploads/' ~ viewed_user.avatar) if viewed_user.avatar and viewed_user.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+        alt="{{ viewed_user.username }}"
+        class="public-avatar"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_avatar.png') }}';"
+      />
+      <div class="public-info">
+        <h1 class="public-username">{{ viewed_user.username }}</h1>
+        {% if viewed_user.bio %}
+          <p class="public-bio">{{ viewed_user.bio }}</p>
+        {% endif %}
+        <div class="public-meta">
+          <span>📅 Joined {{ viewed_user.created_at.strftime('%b %Y') if viewed_user.created_at else 'Recently' }}</span>
+          {% if viewed_user.streak and viewed_user.streak.display_streak > 0 %}
+            <span>🔥 {{ viewed_user.streak.display_streak }}-day streak</span>
+          {% endif %}
+          {% if viewed_user.streak %}
+            <span>💪 {{ viewed_user.streak.total_workouts }} workouts</span>
+          {% endif %}
+        </div>
+        <div class="public-share">
+          <button class="btn-secondary" onclick="copyProfileUrl()" id="copy-url-btn">
+            🔗 Copy Profile URL
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats grid -->
+  {% if viewed_user.profile %}
+  <div class="public-stats">
+    <div class="public-stat-card">
+      <span class="public-stat-value">{{ viewed_user.profile.bmi or '—' }}</span>
+      <span class="public-stat-label">BMI</span>
+    </div>
+    <div class="public-stat-card">
+      <span class="public-stat-value">{{ viewed_user.profile.goal_display() or 'Stay Fit' }}</span>
+      <span class="public-stat-label">Goal</span>
+    </div>
+    <div class="public-stat-card">
+      <span class="public-stat-value">{{ viewed_user.profile.experience_display() or 'Beginner' }}</span>
+      <span class="public-stat-label">Level</span>
+    </div>
+    {% if viewed_user.streak %}
+    <div class="public-stat-card">
+      <span class="public-stat-value">{{ viewed_user.streak.longest_streak }}</span>
+      <span class="public-stat-label">Best Streak</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Current Goals -->
+  {% if goals %}
+  <section class="public-section">
+    <h2 class="section-title">🎯 Current Goals</h2>
+    <div class="public-goals-list">
+      {% for goal in goals %}
+        <div class="public-goal-item">
+          <div class="public-goal-header">
+            <span>{{ goal.title }}</span>
+            <span>{{ goal.progress_percent }}%</span>
+          </div>
+          <div class="goal-progress-bar">
+            <div class="goal-progress-fill" style="width: {{ goal.progress_percent }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Recent Workouts -->
+  {% if recent_logs %}
+  <section class="public-section">
+    <h2 class="section-title">💪 Recent Workouts</h2>
+    <div class="public-logs">
+      {% for log in recent_logs %}
+        <div class="public-log-item">
+          <span class="public-log-ex">{{ log.exercise_name }}</span>
+          <span class="public-log-meta">{{ log.sets_done }}×{{ log.reps_done }}{% if log.weight_kg %} · {{ log.weight_kg }}kg{% endif %}</span>
+          <span class="public-log-date">{{ log.logged_date.strftime('%b %d') if log.logged_date else '' }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+
+<script>
+function copyProfileUrl() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.getElementById('copy-url-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.textContent = '🔗 Copy Profile URL'; }, 2000);
+    if (window.showToast) showToast('Profile URL copied to clipboard!', 'success');
+  });
+}
+</script>
+{% endblock %}

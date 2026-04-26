@@ -1,0 +1,307 @@
+{% extends "base.html" %} {% block title %}{{ day.day }} — Week {{ week.week }}
+— FitAI{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/exercise.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="exercise-wrapper day-detail-wrapper">
+  <!-- Back link / breadcrumb -->
+  <div class="day-breadcrumb">
+    <a href="{{ url_for('exercise.workout') }}" class="day-breadcrumb-link">
+      ← Back to Weekly Schedule
+    </a>
+    <span class="day-breadcrumb-sep">/</span>
+    <span class="day-breadcrumb-current"
+      >Week {{ week.week }} · {{ day.day }}</span
+    >
+  </div>
+
+  <!-- Hero -->
+  <div class="day-hero {% if is_rest %}day-hero--rest{% endif %}">
+    <div class="day-hero-main">
+      <span class="day-hero-kicker"
+        >Week {{ week.week }} of {{ total_weeks }}</span
+      >
+      <h1 class="day-hero-title">
+        {% if is_rest %}🧘 {% else %}🔥 {% endif %}{{ day.day }}
+      </h1>
+      <p class="day-hero-workout">{{ workout_text }}</p>
+      <div class="day-hero-meta">
+        <span
+          class="day-hero-chip {% if is_rest %}day-hero-chip--rest{% else %}day-hero-chip--train{% endif %}"
+        >
+          {% if is_rest %}Recovery Day{% else %}Training Day{% endif %}
+        </span>
+        {% if day_exercises %}
+        <span class="day-hero-chip day-hero-chip--count"
+          >{{ day_exercises|length }} exercise{{ '' if day_exercises|length == 1
+          else 's' }}</span
+        >
+        {% endif %} {% if streak %}
+        <span class="day-hero-chip day-hero-chip--streak"
+          >🔥 {{ streak.display_streak }}-day streak</span
+        >
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="day-hero-actions">
+      {% if not is_rest and day_exercises %}
+      <form method="POST" action="{{ url_for('exercise.log_workout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit" class="btn-log-workout">
+          ✅ Mark Day Complete
+        </button>
+      </form>
+      {% endif %}
+      <a href="{{ url_for('exercise.history') }}" class="btn-secondary"
+        >📅 History</a
+      >
+    </div>
+  </div>
+
+  <!-- Prev / Next navigation -->
+  <div class="day-nav">
+    {% if prev_idx %}
+    <a
+      class="day-nav-btn"
+      href="{{ url_for('exercise.day_detail', week_index=prev_idx[0], day_index=prev_idx[1]) }}"
+    >
+      ← Previous day
+    </a>
+    {% else %}
+    <span class="day-nav-btn day-nav-btn--disabled">← Previous day</span>
+    {% endif %} {% if next_idx %}
+    <a
+      class="day-nav-btn"
+      href="{{ url_for('exercise.day_detail', week_index=next_idx[0], day_index=next_idx[1]) }}"
+    >
+      Next day →
+    </a>
+    {% else %}
+    <span class="day-nav-btn day-nav-btn--disabled">Next day →</span>
+    {% endif %}
+  </div>
+
+  <!-- Rest day card -->
+  {% if is_rest %}
+  <div class="day-rest-card">
+    <div class="day-rest-icon">🛌</div>
+    <h2 class="day-rest-title">Take it easy today</h2>
+    <p class="day-rest-text">
+      Rest days are when your body actually builds strength. Sleep well,
+      hydrate, and move gently — a short walk, light stretching, or mobility
+      work is perfect.
+    </p>
+    <div class="day-rest-tips">
+      <div class="day-rest-tip">💧 Aim for 2–3L of water</div>
+      <div class="day-rest-tip">😴 Target 7–9 hours of sleep</div>
+      <div class="day-rest-tip">🧘 5–10 min of stretching</div>
+    </div>
+  </div>
+
+  {% elif day_exercises %}
+  <!-- Exercise cards -->
+  <section class="exercise-section" id="day-exercises">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🏋️ Today's Exercises</h2>
+        <p class="schedule-intro">
+          Each card below has full instructions, a logging form, and an AI
+          substitute button if a movement doesn't suit you. Log each set as you
+          go!
+        </p>
+      </div>
+    </div>
+
+    <div class="exercise-grid">
+      {% for ex in day_exercises %} {% set is_done = ex.name in done_today %}
+      <div
+        class="exercise-card day-exercise-card {% if is_done %}exercise-card--done{% endif %}"
+        id="ex-{{ ex.name | replace(' ', '-') | lower }}"
+      >
+        <div class="day-card-order">{{ loop.index }}</div>
+
+        <div class="ex-card-header">
+          <span class="ex-icon">{{ ex.icon }}</span>
+          <div class="ex-header-text">
+            <h3 class="ex-name">{{ ex.name }}</h3>
+            <span
+              class="ex-difficulty ex-difficulty--{{ ex.difficulty | lower }}"
+            >
+              {{ ex.difficulty }}
+            </span>
+          </div>
+          {% if is_done %}
+          <span class="ex-done-badge">✅ Done today</span>
+          {% endif %}
+        </div>
+
+        <p class="ex-muscles"><strong>Muscles:</strong> {{ ex.muscles }}</p>
+        <div class="ex-meta">
+          <span class="ex-meta-item">{{ ex.sets }} sets</span>
+          <span class="ex-meta-item">{{ ex.reps }} reps</span>
+          <span class="ex-meta-item">{{ ex.rest }} rest</span>
+          {% if personal_bests.get(ex.name) %}
+          <span class="ex-meta-item ex-pb"
+            >🏅 PB: {{ personal_bests[ex.name] }}kg</span
+          >
+          {% endif %}
+        </div>
+
+        {% if ex.youtube_url %}
+        <a
+          href="{{ ex.youtube_url }}"
+          class="ex-video-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Watch YouTube demo
+        </a>
+        {% endif %}
+
+        <!-- Instructions (open by default on this page) -->
+        <div class="day-instructions-wrap">
+          <div class="day-instructions-heading">📋 How to perform</div>
+          <ol class="ex-instructions ex-instructions--open">
+            {% for step in ex.instructions %}
+            <li>{{ step }}</li>
+            {% endfor %}
+          </ol>
+        </div>
+
+        <!-- Log set form -->
+        <div class="ex-log-form">
+          <form
+            method="POST"
+            action="{{ url_for('exercise.log_exercise') }}"
+            class="log-form-inline"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="exercise_name" value="{{ ex.name }}" />
+            <div class="log-inputs">
+              <div class="log-field">
+                <label>Sets</label>
+                <input
+                  type="number"
+                  name="sets_done"
+                  class="form-input input-sm log-input"
+                  placeholder="{{ ex.sets }}"
+                  min="0"
+                  max="20"
+                  value="{{ ex.sets }}"
+                />
+              </div>
+              <div class="log-field">
+                <label>Reps</label>
+                <input
+                  type="text"
+                  name="reps_done"
+                  class="form-input input-sm log-input"
+                  placeholder="{{ ex.reps }}"
+                  value="{{ ex.reps }}"
+                />
+              </div>
+              <div class="log-field">
+                <label>Weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight_kg"
+                  class="form-input input-sm log-input"
+                  placeholder="optional"
+                  step="0.5"
+                  min="0"
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn-log-set">+ Log Set</button>
+          </form>
+        </div>
+
+        <!-- AI substitution -->
+        <button
+          class="btn-substitute"
+          data-exercise="{{ ex.name }}"
+          data-index="{{ loop.index }}"
+        >
+          🔄 Can't do this? Get alternatives
+        </button>
+        <div
+          class="substitutes-result"
+          id="sub-{{ loop.index }}"
+          style="display: none"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% else %}
+  <!-- Training day but no matched exercises in our library -->
+  <div class="day-empty-card">
+    <div class="day-empty-icon">🤔</div>
+    <h2 class="day-empty-title">We couldn't match exercises automatically</h2>
+    <p class="day-empty-text">
+      Your plan says: <em>"{{ workout_text }}"</em>, but we couldn't find
+      matching movements in our core library yet. Head over to the full exercise
+      library to log your sets manually.
+    </p>
+    <a
+      href="{{ url_for('exercise.workout') }}#exercise-library"
+      class="btn-primary"
+    >
+      Open full exercise library →
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // ── AI Exercise Substitutions ──────────────────────────────
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute("content") : "";
+  }
+
+  document.querySelectorAll(".btn-substitute").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const exerciseName = btn.dataset.exercise;
+      const idx = btn.dataset.index;
+      const resultDiv = document.getElementById(`sub-${idx}`);
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Getting alternatives…";
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = `
+        <div class="sub-loading-wrap">
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text" style="width: 80%"></div>
+          <div class="skeleton skeleton-text" style="width: 60%"></div>
+          <p class="sub-loading-msg">AI is finding the best alternatives...</p>
+        </div>
+      `;
+
+      try {
+        const resp = await fetch('{{ url_for("exercise.get_substitutes") }}', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(),
+          },
+          body: JSON.stringify({ exercise: exerciseName }),
+        });
+        const data = await resp.json();
+        const text = data.substitutes || "No alternatives found.";
+        resultDiv.innerHTML = `<div class="sub-result"><strong>Alternatives for ${exerciseName}:</strong><br>${text.replace(/\n/g, "<br>")}</div>`;
+      } catch {
+        resultDiv.innerHTML =
+          '<div class="sub-result">Failed to fetch alternatives.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🔄 Can't do this? Get alternatives";
+      }
+    });
+  });
+</script>
+{% endblock %}

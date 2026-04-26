@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Step 3 — Height | FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/onboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="onboard-wrapper">
+  <div class="onboard-progress">
+    <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+    <span class="progress-label">Step 3 of 6</span>
+  </div>
+  <div class="onboard-card">
+    <div class="onboard-icon">📏</div>
+    <h2 class="onboard-title">What is your height?</h2>
+    <p class="onboard-sub">Used to calculate your BMI and plan intensity.</p>
+    <form method="POST" action="{{ url_for('onboarding.step3') }}" class="onboard-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group">
+        <label for="height_cm" class="form-label">Height (centimetres)</label>
+        <div class="input-unit-wrap">
+          <input
+            type="number"
+            id="height_cm"
+            name="height_cm"
+            class="form-input onboard-input"
+            placeholder="e.g. 175"
+            value="{{ profile.height_cm or '' }}"
+            min="50"
+            max="280"
+            step="0.1"
+            required
+            autofocus
+          />
+          <span class="unit-badge">cm</span>
+        </div>
+      </div>
+      <button type="submit" class="btn-onboard">Continue <span>→</span></button>
+    </form>
+  </div>
+</div>
+{% endblock %}

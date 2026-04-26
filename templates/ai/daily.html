@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Daily AI Plan — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ai_coach.css') }}" />{% endblock %}
+{% block content %}
+<div class="ai-wrapper">
+  <!-- AI Loading Overlay -->
+  <div class="ai-loading-overlay" id="ai-loading-overlay" style="display: none">
+    <div class="ai-loading-content">
+      <div class="ai-loading-robot">🤖</div>
+      <h2 class="ai-loading-title">Generating Your AI Plan</h2>
+      <p class="ai-loading-text">
+        Tailoring workouts and nutrition to your specific profile and goals...
+      </p>
+      <div class="ai-loading-bar-wrap">
+        <div class="ai-loading-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="ai-page-header">
+    <div class="ai-header-text">
+      <h1 class="ai-page-title">🤖 Your Daily AI Plan</h1>
+      <p class="ai-page-sub">Personalised workout &amp; nutrition for today, powered by AI Coach and Trainer</p>
+    </div>
+    <div class="ai-header-actions">
+      <form method="POST" action="{{ url_for('ai.daily_generate') }}" id="generate-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn-generate" id="generate-btn">
+          <span class="btn-generate-icon">✨</span>
+          <span class="btn-generate-text">{{ 'Refresh Plan' if rec else 'Generate My Plan' }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% if not ai_available %}
+  <!-- No API Key Banner -->
+  <div class="ai-no-key-banner">
+    <span class="no-key-icon">⚠️</span>
+    <div>
+      <strong>AI not connected.</strong>
+      Add your free <a href="https://aistudio.google.com/app/apikey" target="_blank" class="auth-link">AI Coach and Trainer</a>
+      to <code>.env</code> as <code>GEMINI_API_KEY=your-key</code> to get real AI-powered plans.
+      The plan below uses smart fallback data tailored to your goals.
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not rec %}
+  <!-- No plan yet -->
+  <div class="ai-empty-state">
+    <div class="ai-empty-icon">🤖</div>
+    <h2 class="ai-empty-title">No plan generated yet</h2>
+    <p class="ai-empty-sub">Click <strong>"Generate My Plan"</strong> above to get your personalised daily workout and meal plan.</p>
+    <p class="ai-empty-hint">Plans are generated fresh each day and cached so you don't need to regenerate.</p>
+  </div>
+
+  {% else %}
+
+  <div class="ai-tabs" id="ai-plan-tabs">
+    <button class="ai-tab-btn active" data-target="tab-workout">
+      <span class="ai-tab-icon">💪</span>
+      <span class="ai-tab-text">Workout</span>
+    </button>
+    <button class="ai-tab-btn" data-target="tab-meals">
+      <span class="ai-tab-icon">🥗</span>
+      <span class="ai-tab-text">Nutrition</span>
+    </button>
+    <button class="ai-tab-btn" data-target="tab-tips">
+      <span class="ai-tab-icon">💡</span>
+      <span class="ai-tab-text">Coach Tips</span>
+    </button>
+  </div>
+
+  <div class="ai-tab-content">
+    <!-- ── TODAY'S WORKOUT ── -->
+    <div class="ai-tab-pane active" id="tab-workout">
+      <section class="ai-card ai-card--workout">
+        <div class="ai-card-header">
+          <span class="ai-card-icon">💪</span>
+          <div>
+            <h2 class="ai-card-title">Today's Workout</h2>
+            <p class="ai-card-subtitle">{{ rec.workout_title or "AI-Generated Session" }}</p>
+          </div>
+        </div>
+        {% if rec.workout_notes %}
+          <p class="ai-workout-notes">📌 {{ rec.workout_notes }}</p>
+        {% endif %}
+
+        <div class="exercise-list">
+          {% for ex in rec.workout %}
+          <a href="{{ url_for('exercise.workout') }}#ex-{{ ex.exercise | replace(' ', '-') | lower }}" class="ex-item" style="text-decoration: none; color: inherit;">
+          <div class="ex-item-icon">{{ ex.icon if ex.icon else '🏋️' }}</div>
+          <div class="ex-item-body">
+            <div class="ex-item-name">{{ ex.exercise }}</div>
+            <div class="ex-item-muscles">{{ ex.muscles }}</div>
+            {% if ex.notes %}
+              <div class="ex-item-tip">💡 {{ ex.notes }}</div>
+            {% endif %}
+            {% if ex.instructions %}
+              <ul class="ex-item-instructions">
+                {% for step in ex.instructions %}
+                  <li>{{ step }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+          <div class="ex-item-stats">
+            <span class="ex-stat">{{ ex.sets }} sets</span>
+            <span class="ex-stat">{{ ex.reps }}</span>
+            <span class="ex-stat rest">{{ ex.rest }}</span>
+          </div>
+        </a>
+          {% endfor %}
+        </div>
+
+        <form method="POST" action="{{ url_for('exercise.log_workout') }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn-log-today">✅ Log This Workout</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- ── TODAY'S MEAL PLAN ── -->
+    <div class="ai-tab-pane" id="tab-meals">
+      <section class="ai-card ai-card--meals">
+        <div class="ai-card-header">
+          <span class="ai-card-icon">🥗</span>
+          <div>
+            <h2 class="ai-card-title">Today's Meal Plan</h2>
+            {% if rec.meal_plan.total_calories %}
+              <p class="ai-card-subtitle">~{{ rec.meal_plan.total_calories }} kcal total</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% set meals = [
+          ('🌅', 'Breakfast', rec.meal_plan.breakfast),
+          ('☀️', 'Lunch',     rec.meal_plan.lunch),
+          ('🌙', 'Dinner',    rec.meal_plan.dinner)
+        ] %}
+        {% for icon, label, meal in meals %}
+        {% if meal %}
+        <div class="meal-item">
+          <div class="meal-icon">{{ icon }}</div>
+          <div class="meal-body">
+            <div class="meal-label">{{ label }}</div>
+            <div class="meal-name">{{ meal.name }}</div>
+            <div class="meal-macros">
+              <span class="macro-pill macro-cal">{{ meal.calories }} kcal</span>
+              {% if meal.protein %}<span class="macro-pill macro-pro">P: {{ meal.protein }}</span>{% endif %}
+              {% if meal.carbs   %}<span class="macro-pill macro-carb">C: {{ meal.carbs }}</span>{% endif %}
+              {% if meal.fat     %}<span class="macro-pill macro-fat">F: {{ meal.fat }}</span>{% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if rec.meal_plan.snacks %}
+        <div class="snacks-section">
+          <div class="snacks-title">🍎 Snacks</div>
+          <div class="snacks-grid">
+            {% for snack in rec.meal_plan.snacks %}
+            <div class="snack-chip">{{ snack.name }} · <strong>{{ snack.calories }} kcal</strong></div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- ── AI TIPS ── -->
+    <div class="ai-tab-pane" id="tab-tips">
+      <section class="ai-card ai-card--tips">
+        <div class="ai-card-header">
+          <span class="ai-card-icon">💡</span>
+          <div>
+            <h2 class="ai-card-title">Coach Tips for Today</h2>
+            <p class="ai-card-subtitle">Personalised to your goals</p>
+          </div>
+        </div>
+        <ul class="tips-list">
+          {% for tip in rec.tips %}
+          <li class="tip-item">
+            <span class="tip-bullet">→</span>
+            <span>{{ tip }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="{{ url_for('ai.coach') }}" class="btn-ask-coach">
+          🤖 Ask AI Coach a Question
+        </a>
+      </section>
+    </div>
+  </div>
+
+  <p class="ai-gen-time" data-utc-time="{{ rec.generated_at.isoformat() if rec.generated_at else '' }}">
+    Generated: <span id="formatted-gen-time">{{ rec.generated_at.strftime('%B %d, %Y at %H:%M') if rec.generated_at else 'N/A' }}</span>
+  </p>
+  {% endif %}
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/ai_coach.js') }}"></script>
+<script>
+  document.getElementById("generate-form")?.addEventListener("submit", () => {
+    document.getElementById("ai-loading-overlay").style.display = "flex";
+  });
+</script>
+{% endblock %}

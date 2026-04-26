@@ -1,0 +1,318 @@
+{% extends "base.html" %} {% block title %}Workout — FitAI{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/exercise.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="exercise-wrapper">
+  <!-- Hero -->
+  <div class="exercise-hero">
+    <div>
+      <h1 class="exercise-hero-title">💪 Your Workout Hub</h1>
+      {% if plan %}
+      <p class="exercise-hero-sub">{{ plan.title }}</p>
+      {% endif %}
+    </div>
+    <div class="exercise-hero-actions">
+      <a href="{{ url_for('exercise.history') }}" class="btn-secondary"
+        >📅 History & Heatmap</a
+      >
+      <form method="POST" action="{{ url_for('exercise.log_workout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit" class="btn-log-workout">
+          ✅ Log Full Workout
+        </button>
+      </form>
+    </div>
+    {% if streak %}
+    <div class="streak-pill">
+      🔥 {{ streak.display_streak }}-day streak · {{ streak.total_workouts }}
+      total workouts
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Weekly Plan -->
+  {% if plan_weeks %}
+  <section class="exercise-section" id="weekly-schedule">
+    <div class="section-header schedule-header">
+      <div>
+        <h2 class="section-title">📅 Weekly Schedule</h2>
+        <p class="schedule-intro">
+          Tap a day to preview the session card. The exercise library below will
+          focus on the matching movements and keep every set tracker ready.
+        </p>
+      </div>
+    </div>
+
+    <script type="application/json" id="plan-weeks-data">
+      {{ plan_weeks | tojson }}
+    </script>
+
+    <div class="schedule-board">
+      <div class="weeks-accordion" id="weeks-accordion">
+        {% for week in plan_weeks %} {% set week_index = loop.index0 %}
+        <div class="week-panel" data-week-index="{{ week_index }}">
+          <button class="week-header" data-week="{{ week.week }}">
+            <span>Week {{ week.week }}</span>
+            <span class="week-chevron">▼</span>
+          </button>
+          <div class="week-body">
+            <div class="days-grid">
+              {% for day in week.days %} {% set workout_text =
+              day.display_workout | default(day.workout) %} {% set is_rest =
+              "rest" in workout_text | lower %}
+              <a
+                href="{{ url_for('exercise.day_detail', week_index=week_index, day_index=loop.index0) }}"
+                class="day-card schedule-day-card {% if is_rest %}day-card--rest{% else %}day-card--active{% endif %} {% if week_index == 0 and loop.index0 == 0 %}schedule-day-card--selected{% endif %}"
+                data-week-index="{{ week_index }}"
+                data-day-index="{{ loop.index0 }}"
+                aria-pressed="{% if week_index == 0 and loop.index0 == 0 %}true{% else %}false{% endif %}"
+                style="text-decoration: none; color: inherit; text-align: left"
+              >
+                <div class="day-card__top">
+                  <span class="day-name">{{ day.day }}</span>
+                  <span class="day-badge">
+                    {% if is_rest %} Recovery {% else %} Training {% endif %}
+                  </span>
+                </div>
+                <div class="day-workout">{{ workout_text }}</div>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% else %}
+  <div class="empty-state">
+    <p>
+      No plan yet.
+      <a href="{{ url_for('ai.daily') }}" class="auth-link"
+        >Generate a plan →</a
+      >
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- Exercise Library with Logging -->
+  <section class="exercise-section" id="exercise-library">
+    <div class="section-header schedule-header">
+      <div>
+        <h2 class="section-title">📚 Exercise Library — Log Your Sets</h2>
+        <p class="schedule-intro">
+          Each card includes instructions, logging fields, and an AI substitute
+          button if a movement does not suit you.
+        </p>
+      </div>
+    </div>
+
+    <div class="exercise-grid">
+      {% for ex in exercises %} {% set is_done = ex.name in done_today %}
+      <div
+        class="exercise-card {% if is_done %}exercise-card--done{% endif %}"
+        id="ex-{{ ex.name | replace(' ', '-') | lower }}"
+        data-exercise-card
+        data-exercise-key="{{ ex.name | lower | replace(' ', '-') }}"
+      >
+        <div class="ex-card-header">
+          <span class="ex-icon">{{ ex.icon }}</span>
+          <div class="ex-header-text">
+            <h3 class="ex-name">{{ ex.name }}</h3>
+            <span
+              class="ex-difficulty ex-difficulty--{{ ex.difficulty | lower }}"
+              >{{ ex.difficulty }}</span
+            >
+          </div>
+          {% if is_done %}
+          <span class="ex-done-badge">✅ Done today</span>
+          {% endif %}
+        </div>
+
+        <p class="ex-muscles"><strong>Muscles:</strong> {{ ex.muscles }}</p>
+        <div class="ex-meta">
+          <span class="ex-meta-item">{{ ex.sets }} sets</span>
+          <span class="ex-meta-item">{{ ex.reps }} reps</span>
+          <span class="ex-meta-item">{{ ex.rest }} rest</span>
+          {% if personal_bests.get(ex.name) %}
+          <span class="ex-meta-item ex-pb"
+            >🏅 PB: {{ personal_bests[ex.name] }}kg</span
+          >
+          {% endif %}
+        </div>
+
+        {% if ex.youtube_url %}
+        <a
+          href="{{ ex.youtube_url }}"
+          class="ex-video-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Watch YouTube demo
+        </a>
+        {% endif %}
+
+        <!-- Instructions toggle -->
+        <button
+          class="btn-instructions-toggle"
+          data-target="instr-{{ loop.index }}"
+        >
+          View Instructions ▼
+        </button>
+        <ol
+          class="ex-instructions"
+          id="instr-{{ loop.index }}"
+          style="display: none"
+        >
+          {% for step in ex.instructions %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+
+        <!-- Log set form -->
+        <div class="ex-log-form">
+          <form
+            method="POST"
+            action="{{ url_for('exercise.log_exercise') }}"
+            class="log-form-inline"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="exercise_name" value="{{ ex.name }}" />
+            <div class="log-inputs">
+              <div class="log-field">
+                <label>Sets</label>
+                <input
+                  type="number"
+                  name="sets_done"
+                  class="form-input input-sm log-input"
+                  placeholder="{{ ex.sets }}"
+                  min="0"
+                  max="20"
+                  value="{{ ex.sets }}"
+                />
+              </div>
+              <div class="log-field">
+                <label>Reps</label>
+                <input
+                  type="text"
+                  name="reps_done"
+                  class="form-input input-sm log-input"
+                  placeholder="{{ ex.reps }}"
+                  value="{{ ex.reps }}"
+                />
+              </div>
+              <div class="log-field">
+                <label>Weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight_kg"
+                  class="form-input input-sm log-input"
+                  placeholder="optional"
+                  step="0.5"
+                  min="0"
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn-log-set">+ Log Set</button>
+          </form>
+        </div>
+
+        <!-- AI Substitution button -->
+        <button
+          class="btn-substitute"
+          data-exercise="{{ ex.name }}"
+          data-index="{{ loop.index }}"
+        >
+          🔄 Can't do this? Get alternatives
+        </button>
+        <div
+          class="substitutes-result"
+          id="sub-{{ loop.index }}"
+          style="display: none"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // ── Accordion ──────────────────────────────────────────────
+  document.querySelectorAll(".week-header").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const body = btn.nextElementSibling;
+      const isOpen = body.style.display === "block";
+      document
+        .querySelectorAll(".week-body")
+        .forEach((b) => (b.style.display = "none"));
+      document
+        .querySelectorAll(".week-chevron")
+        .forEach((c) => (c.textContent = "▼"));
+      if (!isOpen) {
+        body.style.display = "block";
+        btn.querySelector(".week-chevron").textContent = "▲";
+      }
+    });
+  });
+
+  const firstBody = document.querySelector(".week-body");
+  if (firstBody) {
+    firstBody.style.display = "block";
+    firstBody.previousElementSibling.querySelector(
+      ".week-chevron",
+    ).textContent = "▲";
+  }
+
+  // ── Instructions toggle ────────────────────────────────────
+  document.querySelectorAll(".btn-instructions-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(btn.dataset.target);
+      const isOpen = target.style.display === "block";
+      target.style.display = isOpen ? "none" : "block";
+      btn.textContent = isOpen ? "View Instructions ▼" : "Hide Instructions ▲";
+    });
+  });
+
+  // ── AI Exercise Substitutions ──────────────────────────────
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute("content") : "";
+  }
+
+  document.querySelectorAll(".btn-substitute").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const exerciseName = btn.dataset.exercise;
+      const idx = btn.dataset.index;
+      const resultDiv = document.getElementById(`sub-${idx}`);
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Getting alternatives…";
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = '<div class="sub-loading">Asking AI coach…</div>';
+
+      try {
+        const resp = await fetch('{{ url_for("exercise.get_substitutes") }}', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(),
+          },
+          body: JSON.stringify({ exercise: exerciseName }),
+        });
+        const data = await resp.json();
+        const text = data.substitutes || "No alternatives found.";
+        resultDiv.innerHTML = `<div class="sub-result"><strong>Alternatives for ${exerciseName}:</strong><br>${text.replace(/\n/g, "<br>")}</div>`;
+      } catch {
+        resultDiv.innerHTML =
+          '<div class="sub-result">Failed to fetch alternatives.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🔄 Can't do this? Get alternatives";
+      }
+    });
+  });
+</script>
+{% endblock %}

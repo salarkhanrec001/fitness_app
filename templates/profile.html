@@ -1,0 +1,402 @@
+{% extends "base.html" %} {% block title %}My Profile — FitAI{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/profile.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="profile-wrapper">
+  <!-- ── Profile Header ── -->
+  <div class="profile-hero">
+    <!-- Avatar Upload Zone -->
+    <div
+      class="avatar-upload-zone"
+      id="avatar-zone"
+      title="Click or drag & drop to change photo"
+    >
+      <img
+        src="{{ url_for('static', filename='uploads/' ~ user.avatar) if user.avatar and user.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+        alt="{{ user.username }}'s avatar"
+        class="profile-avatar"
+        id="avatar-preview"
+        data-avatar-fallback="{{ url_for('static', filename='images/default_avatar.png') }}"
+      />
+      <div class="avatar-overlay" id="avatar-overlay">
+        <span class="avatar-overlay-icon">📷</span>
+        <span class="avatar-overlay-text">Change Photo</span>
+      </div>
+      <div class="avatar-drag-hint" id="avatar-drag-hint">Drop image here</div>
+    </div>
+
+    <!-- Hidden file input + upload form -->
+    <form
+      id="avatar-upload-form"
+      method="POST"
+      action="{{ url_for('profile.upload_avatar') }}"
+      enctype="multipart/form-data"
+      style="display: none"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input
+        type="file"
+        id="avatar-file-input"
+        name="avatar"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+      />
+    </form>
+
+    <div class="profile-hero-info">
+      <h1 class="profile-username">{{ user.username }}</h1>
+      <p class="profile-email">{{ user.email }}</p>
+      <p class="profile-bio">{{ user.bio or 'No bio yet — add one below!' }}</p>
+      {% if user.streak %}
+      <div class="profile-streak">
+        🔥 {{ user.streak.display_streak }}-day streak · 💪 {{
+        user.streak.total_workouts }} workouts
+      </div>
+      {% endif %}
+      <div class="avatar-action-row">
+        <button type="button" class="btn-change-photo" id="btn-change-photo">
+          📷 Change Photo
+        </button>
+        {% if user.avatar and user.avatar != 'default_avatar.png' %}
+        <form
+          method="POST"
+          action="{{ url_for('profile.remove_avatar') }}"
+          style="display: inline"
+          onsubmit="return confirm('Remove your profile photo?');"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn-remove-photo">🗑 Remove</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Upload Progress Overlay ── -->
+  <div class="upload-progress-bar" id="upload-progress" style="display: none">
+    <div class="upload-progress-fill" id="upload-progress-fill"></div>
+  </div>
+
+  <!-- ── Body Stats ── -->
+  {% if user.profile %}
+  <section class="profile-section">
+    <h3 class="section-title">📊 Body Stats</h3>
+    <div class="stats-cards">
+      <div class="profile-stat-card">
+        <span class="psc-label">BMI</span>
+        <span class="psc-value bmi-{{ user.profile.bmi_color }}"
+          >{{ user.profile.bmi or '—' }}</span
+        >
+        <span class="psc-sub">{{ user.profile.bmi_category }}</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-label">Weight</span>
+        <span class="psc-value">{{ user.profile.weight_kg or '—' }} kg</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-label">Height</span>
+        <span class="psc-value">{{ user.profile.height_cm or '—' }} cm</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-label">Age</span>
+        <span class="psc-value">{{ user.profile.age or '—' }}</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-label">Goal</span>
+        <span class="psc-value" style="font-size: 1rem"
+          >{{ user.profile.goal_display() }}</span
+        >
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-label">Level</span>
+        <span class="psc-value" style="font-size: 1rem"
+          >{{ user.profile.experience_display() }}</span
+        >
+      </div>
+    </div>
+    <form
+      method="POST"
+      action="{{ url_for('profile.update_stats') }}"
+      class="inline-stat-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input
+        type="number"
+        name="weight_kg"
+        class="form-input input-sm"
+        placeholder="New weight (kg)"
+        step="0.1"
+        min="20"
+        max="500"
+      />
+      <input
+        type="number"
+        name="height_cm"
+        class="form-input input-sm"
+        placeholder="New height (cm)"
+        step="0.1"
+        min="50"
+        max="280"
+      />
+      <button type="submit" class="btn-secondary">Update Stats</button>
+    </form>
+  </section>
+  {% endif %}
+
+  <!-- ── Edit Profile ── -->
+  <section class="profile-section">
+    <h3 class="section-title">✏️ Edit Profile</h3>
+    <form
+      method="POST"
+      action="{{ url_for('profile.edit') }}"
+      class="profile-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group">
+        <label for="p-username" class="form-label">Username</label>
+        <input
+          type="text"
+          id="p-username"
+          name="username"
+          class="form-input"
+          value="{{ user.username }}"
+          required
+          minlength="3"
+        />
+      </div>
+      <div class="form-group">
+        <label for="p-bio" class="form-label">Bio</label>
+        <textarea
+          id="p-bio"
+          name="bio"
+          class="form-input form-textarea"
+          placeholder="Tell us about yourself…"
+          rows="3"
+        >
+{{ user.bio or '' }}</textarea
+        >
+      </div>
+      <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+  </section>
+
+  <!-- ── Change Password ── -->
+  <section class="profile-section">
+    <h3 class="section-title">🔒 Change Password</h3>
+    <form
+      method="POST"
+      action="{{ url_for('account.change_password') }}"
+      class="profile-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group">
+        <label for="current_password" class="form-label"
+          >Current Password</label
+        >
+        <input
+          type="password"
+          id="current_password"
+          name="current_password"
+          class="form-input"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="new_password" class="form-label">New Password</label>
+        <input
+          type="password"
+          id="new_password"
+          name="new_password"
+          class="form-input"
+          required
+          minlength="6"
+        />
+      </div>
+      <div class="form-group">
+        <label for="confirm_password_p" class="form-label"
+          >Confirm New Password</label
+        >
+        <input
+          type="password"
+          id="confirm_password_p"
+          name="confirm_password"
+          class="form-input"
+          required
+        />
+      </div>
+      <button type="submit" class="btn-secondary">Change Password</button>
+    </form>
+  </section>
+
+  <!-- ── Delete Account ── -->
+  <section class="profile-section profile-section--danger">
+    <h3 class="section-title">🗑 Delete Account</h3>
+    <p class="delete-account-warning">
+      This will permanently remove your profile, messages, friendships, workout
+      logs, and uploaded avatar.
+    </p>
+    <form
+      method="POST"
+      action="{{ url_for('account.delete_account') }}"
+      class="profile-form"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group">
+        <label for="delete_current_password" class="form-label"
+          >Current Password</label
+        >
+        <input
+          type="password"
+          id="delete_current_password"
+          name="current_password"
+          class="form-input"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="confirm_delete" class="form-label"
+          >Type DELETE to confirm</label
+        >
+        <input
+          type="text"
+          id="confirm_delete"
+          name="confirm_delete"
+          class="form-input"
+          required
+          autocomplete="off"
+        />
+      </div>
+      <button type="submit" class="btn-delete-account">
+        Delete My Account
+      </button>
+    </form>
+  </section>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  (function () {
+    const zone = document.getElementById("avatar-zone");
+    const fileInput = document.getElementById("avatar-file-input");
+    const uploadForm = document.getElementById("avatar-upload-form");
+    const preview = document.getElementById("avatar-preview");
+    const overlay = document.getElementById("avatar-overlay");
+    const dragHint = document.getElementById("avatar-drag-hint");
+    const progressBar = document.getElementById("upload-progress");
+    const progressFill = document.getElementById("upload-progress-fill");
+    const btnChange = document.getElementById("btn-change-photo");
+
+    const avatarFallback = preview ? preview.dataset.avatarFallback : null;
+    if (preview && avatarFallback) {
+      preview.addEventListener("error", () => {
+        if (preview.dataset.fallbackApplied === "true") return;
+        preview.dataset.fallbackApplied = "true";
+        preview.src = avatarFallback;
+      });
+    }
+
+    const MAX_MB = 2;
+
+    function openPicker() {
+      fileInput.click();
+    }
+
+    zone.addEventListener("click", openPicker);
+    if (btnChange) btnChange.addEventListener("click", openPicker);
+
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("drag-over");
+      if (dragHint) dragHint.style.display = "flex";
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("drag-over");
+      if (dragHint) dragHint.style.display = "none";
+    });
+
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("drag-over");
+      if (dragHint) dragHint.style.display = "none";
+      const files = e.dataTransfer.files;
+      if (files && files[0]) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      const allowed = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/webp",
+        "image/gif",
+      ];
+
+      if (!allowed.includes(file.type)) {
+        alert("Please upload a PNG, JPG, WEBP or GIF image.");
+        return;
+      }
+
+      if (file.size > MAX_MB * 1024 * 1024) {
+        alert(`Image must be under ${MAX_MB}MB.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.animation =
+          "avatar-pop 0.4s cubic-bezier(0.34,1.56,0.64,1)";
+        setTimeout(() => (preview.style.animation = ""), 400);
+      };
+      reader.readAsDataURL(file);
+
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+
+      const formData = new FormData(uploadForm);
+      const xhr = new XMLHttpRequest();
+
+      progressBar.style.display = "block";
+      progressFill.style.width = "0%";
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          progressFill.style.width =
+            Math.round((e.loaded / e.total) * 100) + "%";
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        progressFill.style.width = "100%";
+        setTimeout(() => {
+          progressBar.style.display = "none";
+          window.location.href = xhr.responseURL || window.location.href;
+        }, 400);
+      });
+
+      xhr.addEventListener("error", () => {
+        progressBar.style.display = "none";
+        alert("Upload failed. Please try again.");
+      });
+
+      xhr.open("POST", uploadForm.action);
+      xhr.send(formData);
+    }
+
+    zone.addEventListener("mouseenter", () => {
+      if (overlay) overlay.style.opacity = "1";
+    });
+
+    zone.addEventListener("mouseleave", () => {
+      if (overlay) overlay.style.opacity = "0";
+    });
+  })();
+</script>
+{% endblock %}

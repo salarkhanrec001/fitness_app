@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Step 6 — Experience Level | FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/onboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="onboard-wrapper">
+  <div class="onboard-progress">
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+    <span class="progress-label">Step 6 of 6 — Almost done!</span>
+  </div>
+  <div class="onboard-card">
+    <div class="onboard-icon">🏆</div>
+    <h2 class="onboard-title">What is your experience level?</h2>
+    <p class="onboard-sub">We'll adjust the difficulty to match your fitness level.</p>
+    <form method="POST" action="{{ url_for('onboarding.step6') }}" class="onboard-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="choice-grid">
+        <label class="choice-card choice-card--lg {% if profile.experience_level == 'beginner' %}selected{% endif %}">
+          <input type="radio" name="experience_level" value="beginner" {% if profile.experience_level == 'beginner' %}checked{% endif %} />
+          <span class="choice-icon">🌱</span>
+          <span class="choice-label">Beginner</span>
+          <span class="choice-desc">New to fitness or returning after a long break</span>
+        </label>
+        <label class="choice-card choice-card--lg {% if profile.experience_level == 'intermediate' %}selected{% endif %}">
+          <input type="radio" name="experience_level" value="intermediate" {% if profile.experience_level == 'intermediate' %}checked{% endif %} />
+          <span class="choice-icon">⚡</span>
+          <span class="choice-label">Intermediate</span>
+          <span class="choice-desc">Training consistently for 6+ months</span>
+        </label>
+        <label class="choice-card choice-card--lg {% if profile.experience_level == 'advanced' %}selected{% endif %}">
+          <input type="radio" name="experience_level" value="advanced" {% if profile.experience_level == 'advanced' %}checked{% endif %} />
+          <span class="choice-icon">🔥</span>
+          <span class="choice-label">Advanced</span>
+          <span class="choice-desc">2+ years of dedicated training</span>
+        </label>
+      </div>
+      <button type="submit" class="btn-onboard btn-onboard--finish">
+        Generate My Plan 🚀
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

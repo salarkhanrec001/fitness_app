@@ -1,0 +1,173 @@
+{% extends "base.html" %} {% block title %}Chat with {{ friend.username }} —
+FitAI{% endblock %} {% block extra_css %}<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/social.css') }}"
+/>{% endblock %} {% block content %}
+<div class="chat-wrapper" id="chat-wrapper" data-friend-id="{{ friend.id }}">
+  <div class="chat-header">
+    <a href="{{ url_for('social.friends') }}" class="chat-back">← Back</a>
+    <img
+      src="{{ url_for('static', filename='uploads/' ~ friend.avatar) if friend.avatar and friend.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+      alt="{{ friend.username }}"
+      class="chat-header-avatar"
+      id="chat-header-avatar"
+    />
+    <div>
+      <h3 class="chat-friend-name">{{ friend.username }}</h3>
+      <span class="chat-status">Fitness buddy</span>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    {% for msg in messages %}
+    <div
+      class="chat-bubble {% if msg.sender_id == current_user.id %}chat-bubble--mine{% else %}chat-bubble--theirs{% endif %}"
+      data-created-at="{{ msg.created_at_iso }}"
+      data-created-at-display="{{ msg.created_at_display }}"
+      data-created-at-date-key="{{ msg.created_at_date_key }}"
+      data-created-at-date-label="{{ msg.created_at_date_label }}"
+    >
+      <span class="bubble-text">{{ msg.body }}</span>
+      <span class="bubble-time">{{ msg.created_at_display }}</span>
+    </div>
+    {% else %}
+    <div class="chat-empty">
+      <p>Say hello to {{ friend.username }}! 👋</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form
+    method="POST"
+    action="{{ url_for('social.send_message', friend_id=friend.id) }}"
+    class="chat-form"
+    id="chat-form"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input
+      type="text"
+      name="body"
+      id="chat-input"
+      class="chat-input"
+      placeholder="Type a message…"
+      autocomplete="off"
+      required
+    />
+    <button type="submit" class="btn-send">Send ➤</button>
+  </form>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  const chatMessages = document.getElementById("chat-messages");
+  const chatWrapper = document.getElementById("chat-wrapper");
+  const friendId = Number(chatWrapper?.dataset.friendId || 0);
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+  }
+
+  const chatTimeFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Karachi",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  function formatTimeFromIso(iso) {
+    if (!iso) return "";
+    return chatTimeFormatter.format(new Date(iso));
+  }
+
+  function renderMessages(messages) {
+    if (!chatMessages) return;
+
+    if (!messages.length) {
+      chatMessages.innerHTML =
+        '<div class="chat-empty"><p>No messages yet.</p></div>';
+      return;
+    }
+
+    let html = "";
+    let lastDateKey = null;
+
+    messages.forEach((message) => {
+      const currentDateKey = message.created_at_date_key || "";
+
+      if (currentDateKey !== lastDateKey) {
+        html += `
+          <div class="chat-date-separator" aria-hidden="true">
+            <span class="chat-date-pill">${escapeHtml(message.created_at_date_label || "")}</span>
+          </div>
+        `;
+        lastDateKey = currentDateKey;
+      }
+
+      const bubbleTime =
+        formatTimeFromIso(message.created_at_iso) ||
+        message.created_at_display ||
+        "";
+
+      html += `
+        <div class="chat-bubble ${message.is_mine ? "chat-bubble--mine" : "chat-bubble--theirs"}" data-created-at="${escapeHtml(message.created_at_iso || "")}" data-created-at-display="${escapeHtml(message.created_at_display || "")}" data-created-at-date-key="${escapeHtml(message.created_at_date_key || "")}" data-created-at-date-label="${escapeHtml(message.created_at_date_label || "")}">
+          <span class="bubble-text">${escapeHtml(message.body)}</span>
+          <span class="bubble-time">${escapeHtml(bubbleTime)}</span>
+        </div>
+      `;
+    });
+
+    chatMessages.innerHTML = html;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function getInitialMessagesFromDom() {
+    if (!chatMessages) return [];
+
+    return Array.from(chatMessages.querySelectorAll(".chat-bubble"))
+      .map((bubble) => ({
+        body: bubble.querySelector(".bubble-text")?.textContent || "",
+        created_at_iso: bubble.dataset.createdAt || "",
+        created_at_display: bubble.dataset.createdAtDisplay || "",
+        created_at_date_key: bubble.dataset.createdAtDateKey || "",
+        created_at_date_label: bubble.dataset.createdAtDateLabel || "",
+        is_mine: bubble.classList.contains("chat-bubble--mine"),
+      }))
+      .filter((message) => message.created_at_iso);
+  }
+
+  function refreshMessages() {
+    fetch(`/social/messages-api/${friendId}`)
+      .then((response) => response.json())
+      .then((messages) => renderMessages(messages))
+      .catch(() => {});
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!chatMessages) return;
+
+    const avatar = document.getElementById("chat-header-avatar");
+    if (avatar) {
+      avatar.addEventListener("error", () => {
+        avatar.src =
+          "{{ url_for('static', filename='images/default_avatar.png') }}";
+      });
+    }
+
+    renderMessages(getInitialMessagesFromDom());
+
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+
+    if (chatForm && chatInput) {
+      chatForm.addEventListener("submit", () => {
+        setTimeout(() => {
+          chatInput.value = "";
+        }, 0);
+      });
+    }
+
+    setInterval(refreshMessages, 5000);
+  });
+</script>
+{% endblock %}

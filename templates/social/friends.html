@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Friends — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}" />{% endblock %}
+{% block content %}
+<div class="social-wrapper">
+  <h2 class="social-title">👥 Friends</h2>
+
+  <!-- Search -->
+  <section class="social-section">
+    <h3 class="section-title">🔍 Find Friends</h3>
+    <form method="GET" action="{{ url_for('social.friends') }}" class="search-form">
+      <input
+        type="text"
+        name="q"
+        id="friend-search"
+        class="form-input search-input"
+        placeholder="Search by username…"
+        value="{{ query }}"
+        autocomplete="off"
+      />
+      <button type="submit" class="btn-primary">Search</button>
+    </form>
+
+    {% if search_results %}
+      <div class="user-results">
+        {% for user in search_results %}
+          <div class="user-card">
+            <img
+              src="{{ url_for('static', filename='uploads/' ~ user.avatar) if user.avatar and user.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+              alt="{{ user.username }}"
+              class="user-card-avatar"
+              onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_avatar.png') }}';"
+            />
+            <div class="user-card-info">
+              <span class="user-card-name">{{ user.username }}</span>
+              <span class="user-card-bio">{{ user.bio|truncate(60, true, '...') if user.bio else 'No bio yet' }}</span>
+            </div>
+            {% if current_user.is_friend_with(user) %}
+              <span class="badge badge--friend">✓ Friends</span>
+            {% elif user.id in (sent_requests | map(attribute='receiver_id') | list) %}
+              <span class="badge badge--pending">⧖ Pending</span>
+            {% else %}
+              <form method="POST" action="{{ url_for('social.send_request', user_id=user.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="btn-sm btn-primary">Add Friend</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% elif query %}
+      <p class="empty-hint">No users found for "{{ query|e }}".</p>
+    {% endif %}
+  </section>
+
+  <!-- Suggested Friends -->
+  {% if suggestions %}
+  <section class="social-section suggestions-section">
+    <h3 class="section-title">💡 People You May Know</h3>
+    <div class="suggestions-scroller" id="suggestions-scroller">
+      {% for user in suggestions %}
+        <div class="suggestion-card">
+          <!-- Close button to remove suggestion -->
+          <button type="button" class="btn-close-suggestion" title="Not interested" onclick="this.closest('.suggestion-card').remove(); checkEmptySuggestions();">×</button>
+          
+          <img
+            src="{{ url_for('static', filename='uploads/' ~ user.avatar) if user.avatar and user.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+            alt="{{ user.username }}"
+            class="suggestion-avatar"
+            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_avatar.png') }}';"
+          />
+          <h4 class="suggestion-name">{{ user.username }}</h4>
+          <p class="suggestion-bio">{{ user.bio|truncate(40, true, '...') if user.bio else 'No bio yet' }}</p>
+          
+          <form method="POST" action="{{ url_for('social.send_request', user_id=user.id) }}" class="suggestion-action">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn-sm btn-primary w-100">Add Friend</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  
+  {% endif %}
+
+  <!-- Pending Requests -->
+  {% if pending_requests %}
+  <section class="social-section">
+    <h3 class="section-title">📬 Pending Requests</h3>
+    <div class="requests-list">
+      {% for req in pending_requests %}
+        <div class="request-card">
+          <img
+            src="{{ url_for('static', filename='uploads/' ~ req.sender.avatar) if req.sender.avatar and req.sender.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+            alt="{{ req.sender.username }}"
+            class="user-card-avatar"
+            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_avatar.png') }}';"
+          />
+          <span class="request-name">{{ req.sender.username }} wants to be friends</span>
+          <div class="request-actions">
+            <form method="POST" action="{{ url_for('social.accept_request', request_id=req.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn-sm btn-success">Accept</button>
+            </form>
+            <form method="POST" action="{{ url_for('social.reject_request', request_id=req.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn-sm btn-danger">Reject</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Friends List -->
+  <section class="social-section">
+    <h3 class="section-title">🤝 My Friends ({{ friends | length }})</h3>
+    {% if friends %}
+      <div class="friends-grid">
+        {% for friend in friends %}
+          <div class="friend-card">
+            <img
+              src="{{ url_for('static', filename='uploads/' ~ friend.avatar) if friend.avatar and friend.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+              alt="{{ friend.username }}"
+              class="friend-card-avatar"
+              onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_avatar.png') }}';"
+            />
+            <h4 class="friend-name">{{ friend.username }}</h4>
+            <p class="friend-bio">{{ friend.bio|truncate(50, true, '...') if friend.bio else '' }}</p>
+            <a href="{{ url_for('social.chat', friend_id=friend.id) }}" class="btn-sm btn-primary">💬 Chat</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">🤝</div>
+        <h3 class="empty-state-title">Your circle is quiet</h3>
+        <p class="empty-state-text">Fitness is better with friends! Search for other athletes above to connect, share progress, and compete.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<script>
+  function checkEmptySuggestions() {
+    const scroller = document.getElementById('suggestions-scroller');
+    if (scroller && scroller.children.length === 0) {
+      const section = scroller.closest('.suggestions-section');
+      if (section) section.style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}

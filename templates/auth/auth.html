@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'signup' %}Create Account{% else %}Sign In{% endif %} — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />{% endblock %}
+
+{% block content %}
+<div class="auth-container" id="auth-container" data-mode="{{ mode }}">
+
+  <!-- ════════════════════════════════════════════
+       SIGN-IN PANEL (left)
+  ════════════════════════════════════════════ -->
+  <div class="auth-panel auth-panel--login">
+    <div class="panel-inner">
+      <div class="auth-logo">
+        <span class="auth-logo-icon">⚡</span>
+        <h1 class="auth-logo-text">FitAI</h1>
+        <p class="auth-tagline">Welcome back, athlete 💪</p>
+      </div>
+
+      <h2 class="auth-title">Sign In</h2>
+
+      <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" id="login-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="form-group">
+          <label for="li-identifier" class="form-label">Username or Email</label>
+          <input type="text" id="li-identifier" name="identifier" class="form-input"
+                 placeholder="Enter username or email" required autocomplete="username"
+                 value="{{ li_identifier | default('') }}" />
+        </div>
+        <div class="form-group">
+          <label for="li-password" class="form-label">Password</label>
+          <div class="input-password-wrap">
+            <input type="password" id="li-password" name="password" class="form-input"
+                   placeholder="Your password" required autocomplete="current-password" />
+            <button type="button" class="btn-toggle-pw" data-target="li-password" aria-label="Toggle password">👁</button>
+          </div>
+        </div>
+        <div class="form-row-between">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember" id="li-remember" />
+            <span>Remember me</span>
+          </label>
+          <a href="{{ url_for('account.forgot_password') }}" class="auth-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn-auth" id="login-btn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <button type="button" class="auth-toggle-btn" data-target="signup">Sign up free →</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SIGN-UP PANEL (right)
+  ════════════════════════════════════════════ -->
+  <div class="auth-panel auth-panel--signup">
+    <div class="panel-inner">
+      <div class="auth-logo">
+        <span class="auth-logo-icon">⚡</span>
+        <h1 class="auth-logo-text">FitAI</h1>
+        <p class="auth-tagline">Your AI-powered fitness coach</p>
+      </div>
+
+      <h2 class="auth-title">Create Account</h2>
+
+      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form" id="signup-form"
+            enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <!-- Avatar upload at signup -->
+        <div class="signup-avatar-row">
+          <div class="signup-avatar-zone" id="signup-avatar-zone" title="Add a profile photo (optional)">
+            <img src="{{ url_for('static', filename='images/default_avatar.png') }}"
+                 class="signup-avatar-preview" id="signup-avatar-preview" alt="Profile photo" />
+            <div class="signup-avatar-overlay">
+              <span>📷</span>
+              <span class="signup-avatar-hint">Add Photo</span>
+            </div>
+          </div>
+          <input type="file" id="signup-avatar-input" name="avatar"
+                 accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" />
+          <div class="signup-avatar-label">
+            <span class="signup-avatar-main">Profile Photo</span>
+            <span class="signup-avatar-sub">Optional · PNG, JPG, WEBP · Max 8MB</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="su-username" class="form-label">Username</label>
+          <input type="text" id="su-username" name="username" class="form-input"
+                 placeholder="Choose a username" required minlength="3" autocomplete="username"
+                 value="{{ su_username | default('') }}" />
+        </div>
+        <div class="form-group">
+          <label for="su-email" class="form-label">Email Address</label>
+          <input type="email" id="su-email" name="email" class="form-input"
+                 placeholder="you@example.com" required autocomplete="email"
+                 value="{{ su_email | default('') }}" />
+        </div>
+        <div class="form-group">
+          <label for="su-password" class="form-label">Password</label>
+          <div class="input-password-wrap">
+            <input type="password" id="su-password" name="password" class="form-input"
+                   placeholder="At least 6 characters" required minlength="6" autocomplete="new-password" />
+            <button type="button" class="btn-toggle-pw" data-target="su-password" aria-label="Toggle password">👁</button>
+          </div>
+        </div>
+
+        <!-- Strength bar -->
+        <div class="password-strength">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <span class="strength-label" id="strength-label">Password strength</span>
+        </div>
+
+        <div class="form-group">
+          <label for="su-confirm" class="form-label">Confirm Password</label>
+          <div class="input-password-wrap">
+            <input type="password" id="su-confirm" name="confirm_password" class="form-input"
+                   placeholder="Repeat your password" required autocomplete="new-password" />
+            <button type="button" class="btn-toggle-pw" data-target="su-confirm" aria-label="Toggle password">👁</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-auth" id="signup-btn">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account?
+        <button type="button" class="auth-toggle-btn" data-target="login">Sign in →</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SLIDING OVERLAY PANEL
+  ════════════════════════════════════════════ -->
+  <div class="auth-overlay" id="auth-overlay">
+    <!-- Login side of overlay (shown when signup is active) -->
+    <div class="overlay-panel overlay-panel--left" id="overlay-login">
+      <div class="overlay-content">
+        <div class="overlay-logo">⚡ FitAI</div>
+        <h2 class="overlay-title">Welcome Back!</h2>
+        <p class="overlay-sub">Sign in to continue your fitness journey and stay on track.</p>
+        <div class="overlay-features">
+          <div class="overlay-feature">🔥 Your streak is waiting</div>
+          <div class="overlay-feature">🤖 AI Coach ready for you</div>
+          <div class="overlay-feature">🎯 Goals on the horizon</div>
+        </div>
+        <button class="btn-overlay" id="overlay-go-login" data-target="login">
+          Sign In
+        </button>
+      </div>
+    </div>
+    <!-- Signup side of overlay (shown when login is active) -->
+    <div class="overlay-panel overlay-panel--right" id="overlay-signup">
+      <div class="overlay-content">
+        <div class="overlay-logo">⚡ FitAI</div>
+        <h2 class="overlay-title">New Here?</h2>
+        <p class="overlay-sub">Join thousands of athletes crushing their fitness goals with AI.</p>
+        <div class="overlay-features">
+          <div class="overlay-feature">🏋️ Personalised AI workout plans</div>
+          <div class="overlay-feature">🥗 AI daily meal suggestions</div>
+          <div class="overlay-feature">👥 Social fitness community</div>
+          <div class="overlay-feature">📈 Smart progress tracking</div>
+        </div>
+        <button class="btn-overlay" id="overlay-go-signup" data-target="signup">
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

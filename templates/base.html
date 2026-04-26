@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>{% block title %}FitAI — Your AI Fitness Coach{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block meta_desc %}FitAI is your personal AI-powered fitness coach. Get personalised workout plans, track goals, and connect with friends.{% endblock %}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ url_for('static', filename='images/favicon.svg') }}"
+    />
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    {% if current_user.is_authenticated %}
+    <!-- ── Top Navbar ── -->
+    <nav class="navbar" id="main-navbar">
+      <div class="nav-brand">
+        <a href="{{ url_for('dashboard.index') }}" class="brand-link">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-text">FitAI</span>
+        </a>
+      </div>
+      <div class="nav-links" id="nav-links">
+        <a
+          href="{{ url_for('dashboard.index') }}"
+          class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
+        >
+          <span>🏠</span> Dashboard
+        </a>
+        <a
+          href="{{ url_for('exercise.workout') }}"
+          class="nav-link {% if request.blueprint == 'exercise' %}active{% endif %}"
+        >
+          <span>💪</span> Workout
+        </a>
+        <a
+          href="{{ url_for('goals.index') }}"
+          class="nav-link {% if request.blueprint == 'goals' %}active{% endif %}"
+        >
+          <span>🎯</span> Goals
+        </a>
+        <a
+          href="{{ url_for('social.friends') }}"
+          class="nav-link {% if request.blueprint == 'social' %}active{% endif %}"
+        >
+          <span>👥</span> Social
+        </a>
+        <a
+          href="{{ url_for('ai.daily') }}"
+          class="nav-link {% if request.blueprint == 'ai' %}active{% endif %}"
+        >
+          <span>🤖</span> AI Coach
+        </a>
+      </div>
+      <div class="nav-user">
+        <!-- Dark/Light mode toggle -->
+        <button
+          class="btn-theme-toggle"
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          title="Toggle dark/light mode"
+        >
+          <span id="theme-icon">🌙</span>
+        </button>
+        <a href="{{ url_for('profile.index') }}" class="user-avatar-link">
+          <img
+            src="{{ url_for('static', filename='uploads/' + current_user.avatar) if current_user.avatar and current_user.avatar != 'default_avatar.png' else url_for('static', filename='images/default_avatar.png') }}"
+            alt="{{ current_user.username }}"
+            class="nav-avatar"
+            loading="lazy"
+            data-avatar-fallback="{{ url_for('static', filename='images/default_avatar.png') }}"
+          />
+          <span class="nav-username">{{ current_user.username }}</span>
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+      </div>
+    </nav>
+
+    <!-- ── Mobile Bottom Tab Bar ── -->
+    <nav class="mobile-tab-bar" id="mobile-tab-bar">
+      <a
+        href="{{ url_for('dashboard.index') }}"
+        class="tab-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
+      >
+        <span class="tab-icon">🏠</span>
+        <span class="tab-label">Home</span>
+      </a>
+      <a
+        href="{{ url_for('exercise.workout') }}"
+        class="tab-item {% if request.blueprint == 'exercise' %}active{% endif %}"
+      >
+        <span class="tab-icon">💪</span>
+        <span class="tab-label">Workout</span>
+      </a>
+      <a
+        href="{{ url_for('ai.daily') }}"
+        class="tab-item tab-item--center {% if request.blueprint == 'ai' %}active{% endif %}"
+      >
+        <span class="tab-icon tab-center-icon">🤖</span>
+        <span class="tab-label">AI</span>
+      </a>
+      <a
+        href="{{ url_for('social.friends') }}"
+        class="tab-item {% if request.blueprint == 'social' %}active{% endif %}"
+      >
+        <span class="tab-icon">👥</span>
+        <span class="tab-label">Social</span>
+      </a>
+      <a
+        href="{{ url_for('profile.index') }}"
+        class="tab-item {% if request.blueprint == 'profile' %}active{% endif %}"
+      >
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">Profile</span>
+      </a>
+    </nav>
+    {% endif %}
+
+    <!-- ── Toast Notification Container ── -->
+    <div
+      class="toast-container"
+      id="toast-container"
+      role="status"
+      aria-live="polite"
+    >
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="toast toast--{{ category }}" role="alert">
+        <span class="toast-icon">
+          {% if category == 'success' %}✅ {% elif category == 'error' %}❌ {%
+          elif category == 'info' %}ℹ️ {% else %}⚠️{% endif %}
+        </span>
+        <span class="toast-msg">{{ message }}</span>
+        <button class="toast-close" aria-label="Dismiss">×</button>
+        <div class="toast-progress"></div>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+
+    <main
+      class="main-content {% if not current_user.is_authenticated %}main-content--auth{% endif %}"
+    >
+      {% block content %}{% endblock %}
+    </main>
+
+    <script>
+      // ── Theme toggle (dark/light) ────────────────────────────────
+      (function () {
+        const html = document.documentElement;
+        const btn = document.getElementById("theme-toggle");
+        const icon = document.getElementById("theme-icon");
+        const saved = localStorage.getItem("fitai-theme") || "dark";
+        html.dataset.theme = saved;
+        if (icon) icon.textContent = saved === "dark" ? "🌙" : "☀️";
+
+        if (btn) {
+          btn.addEventListener("click", () => {
+            const next = html.dataset.theme === "dark" ? "light" : "dark";
+            html.dataset.theme = next;
+            localStorage.setItem("fitai-theme", next);
+            icon.textContent = next === "dark" ? "🌙" : "☀️";
+            // Animate the button
+            btn.style.transform = "rotate(360deg) scale(1.2)";
+            setTimeout(() => (btn.style.transform = ""), 400);
+          });
+        }
+      })();
+
+      // Avatar fallback ────────────────────────────────────────
+      document.querySelectorAll(".nav-avatar").forEach((img) => {
+        const fallbackSrc = img.dataset.avatarFallback;
+        if (!fallbackSrc) return;
+        img.addEventListener("error", () => {
+          if (img.dataset.fallbackApplied === "true") return;
+          img.dataset.fallbackApplied = "true";
+          img.src = fallbackSrc;
+        });
+      });
+
+      // ── Toast System ──────────────────────────────────────────
+      (function () {
+        const DURATION = 4000; // ms
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+
+        function dismissToast(toast) {
+          toast.classList.add("toast--out");
+          setTimeout(() => toast.remove(), 400);
+        }
+
+        function initToast(toast) {
+          // Progress bar animation
+          const progress = toast.querySelector(".toast-progress");
+          if (progress) {
+            progress.style.transition = `width ${DURATION}ms linear`;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                progress.style.width = "0%";
+              });
+            });
+          }
+          // Auto-dismiss
+          const timer = setTimeout(() => dismissToast(toast), DURATION);
+          // Manual close
+          const closeBtn = toast.querySelector(".toast-close");
+          if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+              clearTimeout(timer);
+              dismissToast(toast);
+            });
+          }
+          // Pause on hover — track remaining time to handle re-hover correctly
+          let remaining = DURATION;
+          let startTime = Date.now();
+          toast.addEventListener("mouseenter", () => {
+            clearTimeout(timer);
+            remaining -= Date.now() - startTime;
+          });
+          toast.addEventListener("mouseleave", () => {
+            startTime = Date.now();
+            setTimeout(() => dismissToast(toast), remaining);
+          });
+        }
+
+        // Init pre-rendered toasts (from flash messages)
+        container.querySelectorAll(".toast").forEach(initToast);
+
+        // Expose global function to show toasts from JS
+        window.showToast = function (message, type = "info") {
+          const toast = document.createElement("div");
+          toast.className = `toast toast--${type}`;
+          const icons = {
+            success: "✅",
+            error: "❌",
+            info: "ℹ️",
+            warning: "⚠️",
+          };
+          toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || "ℹ️"}</span>
+        <span class="toast-msg">${message}</span>
+        <button class="toast-close" aria-label="Dismiss">×</button>
+        <div class="toast-progress"></div>
+      `;
+          container.appendChild(toast);
+          // Trigger entrance animation
+          requestAnimationFrame(() => toast.classList.add("toast--in"));
+          initToast(toast);
+        };
+      })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

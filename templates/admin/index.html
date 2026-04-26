@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — FitAI{% endblock %}
+{% block content %}
+<div class="admin-wrapper">
+  <h1 class="admin-title">⚙️ Admin Dashboard</h1>
+
+  <!-- Stat Cards -->
+  <div class="admin-stats">
+    <div class="admin-stat-card">
+      <div class="admin-stat-num">{{ total_users }}</div>
+      <div class="admin-stat-label">Total Users</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-num">{{ active_today }}</div>
+      <div class="admin-stat-label">Active Today</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-num">{{ total_workouts }}</div>
+      <div class="admin-stat-label">Total Workouts</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-num">{{ goals_done }} / {{ total_goals }}</div>
+      <div class="admin-stat-label">Goals Completed</div>
+    </div>
+  </div>
+
+  <!-- Top Streaks -->
+  <section class="admin-section">
+    <h2 class="section-title">🔥 Top Streaks</h2>
+    <table class="log-table">
+      <thead><tr><th>#</th><th>User</th><th>Current Streak</th><th>Longest</th><th>Total Workouts</th></tr></thead>
+      <tbody>
+        {% for s in top_streaks %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ s.user.username }}</td>
+            <td>🔥 {{ s.current_streak }} days</td>
+            <td>{{ s.longest_streak }}</td>
+            <td>{{ s.total_workouts }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Recent Users -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2 class="section-title">👥 Recent Signups</h2>
+      <a href="{{ url_for('admin.users') }}" class="btn-secondary">View All Users</a>
+    </div>
+    <table class="log-table">
+      <thead><tr><th>Username</th><th>Email</th><th>Joined</th><th>Onboarding</th></tr></thead>
+      <tbody>
+        {% for u in recent_users %}
+          <tr>
+            <td><a href="{{ url_for('profile.public_profile', username=u.username) }}" class="admin-user-link">{{ u.username }}</a></td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '—' }}</td>
+            <td>{% if u.onboarding_complete %}<span style="color:var(--clr-success)">✅ Done</span>{% else %}<span style="color:var(--clr-warning)">⏳ Pending</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}

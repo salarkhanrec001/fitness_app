@@ -1,0 +1,429 @@
+/* ============================================================
+   auth.css — Animated Login/Signup Toggle Page
+   ============================================================ */
+
+/* ── Container ── */
+.auth-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background: var(--clr-bg);
+}
+
+/* ── Panels ── */
+.auth-panel {
+  width: 50%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  transition: transform 0.65s cubic-bezier(0.68, -0.15, 0.27, 1.15);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-panel--login  { background: var(--clr-surface); }
+.auth-panel--signup { background: var(--clr-surface); }
+
+.panel-inner {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Sliding Overlay ── */
+.auth-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 100;
+  transition: transform 0.65s cubic-bezier(0.68, -0.15, 0.27, 1.15);
+  /* Shared gradient background */
+  background: linear-gradient(135deg, #1a1040 0%, #0d1a2e 50%, #1a0a30 100%);
+}
+.auth-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 40%, rgba(108,99,255,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(0,212,170,0.2) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Each panel fills the full overlay — only one is visible at a time */
+.overlay-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 1;
+}
+
+.overlay-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.1rem;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.overlay-logo {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+.overlay-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.overlay-sub {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.overlay-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+.overlay-feature {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+  text-align: left;
+  backdrop-filter: blur(6px);
+  animation: float-feature 4s ease-in-out infinite;
+}
+.overlay-feature:nth-child(2) { animation-delay: 0.4s; }
+.overlay-feature:nth-child(3) { animation-delay: 0.8s; }
+.overlay-feature:nth-child(4) { animation-delay: 1.2s; }
+@keyframes float-feature {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+.btn-overlay {
+  margin-top: 0.5rem;
+  padding: 0.75rem 2.5rem;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.7);
+  border-radius: 99px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
+  letter-spacing: 0.03em;
+}
+.btn-overlay:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: #fff;
+  transform: scale(1.04);
+}
+
+/* ════════════════════════════════════
+   State: login mode (default)
+   Overlay slides RIGHT to cover the SIGNUP (right) panel
+════════════════════════════════════ */
+.auth-container[data-mode="login"] .auth-overlay {
+  transform: translateX(100%);
+}
+/* Show the "New Here?" (right panel) content */
+.auth-container[data-mode="login"] .overlay-panel--right {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.auth-container[data-mode="login"] .overlay-panel--left {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+.auth-container[data-mode="login"] .auth-panel--signup { pointer-events: none; opacity: 0; }
+.auth-container[data-mode="login"] .auth-panel--login  { opacity: 1; }
+
+/* ════════════════════════════════════
+   State: signup mode
+   Overlay slides LEFT to cover the LOGIN (left) panel
+════════════════════════════════════ */
+.auth-container[data-mode="signup"] .auth-overlay {
+  transform: translateX(0%);
+}
+/* Show the "Welcome Back!" (left panel) content */
+.auth-container[data-mode="signup"] .overlay-panel--left {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.auth-container[data-mode="signup"] .overlay-panel--right {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+.auth-container[data-mode="signup"] .auth-panel--login  { pointer-events: none; opacity: 0; }
+.auth-container[data-mode="signup"] .auth-panel--signup { opacity: 1; }
+
+/* Panel opacity transitions */
+.auth-panel {
+  transition: transform 0.65s cubic-bezier(0.68, -0.15, 0.27, 1.15),
+              opacity 0.4s ease;
+}
+
+/* ── Auth Logo ── */
+.auth-logo { text-align: center; margin-bottom: 1.25rem; }
+.auth-logo-icon { font-size: 2.4rem; display: block; margin-bottom: 0.3rem; }
+.auth-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+.auth-tagline { color: var(--clr-text-muted); font-size: 0.875rem; margin-top: 0.2rem; }
+
+/* ── Auth Title ── */
+.auth-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+/* ── Form ── */
+.auth-form { display: flex; flex-direction: column; gap: 0.9rem; }
+
+.form-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.input-password-wrap { position: relative; }
+.input-password-wrap .form-input { padding-right: 3rem; }
+.btn-toggle-pw {
+  position: absolute; right: 0.75rem; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  font-size: 1rem; opacity: 0.6;
+  transition: var(--transition); cursor: pointer;
+}
+.btn-toggle-pw:hover { opacity: 1; }
+
+.checkbox-label {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.82rem; color: var(--clr-text-muted); cursor: pointer;
+}
+.checkbox-label input[type="checkbox"] {
+  accent-color: var(--clr-primary); width: 14px; height: 14px;
+}
+
+/* ── CTA Button ── */
+.btn-auth {
+  display: flex; justify-content: center; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, var(--clr-primary), #8b5cf6);
+  color: #fff; border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem; font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer; transition: var(--transition);
+  margin-top: 0.25rem;
+  position: relative; overflow: hidden;
+}
+.btn-auth::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.25s;
+}
+.btn-auth:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(108,99,255,0.45); }
+.btn-auth:hover::after { background: rgba(255,255,255,0.05); }
+.btn-auth:active { transform: translateY(0); }
+.btn-auth:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+/* ── Auth Switch ── */
+.auth-switch {
+  text-align: center;
+  color: var(--clr-text-muted);
+  font-size: 0.875rem;
+  margin-top: 1.25rem;
+}
+.auth-link {
+  color: var(--clr-primary); font-weight: 600;
+  text-decoration: none; transition: var(--transition);
+}
+.auth-link:hover { color: var(--clr-primary-h); text-decoration: underline; }
+
+.auth-toggle-btn {
+  background: none; border: none;
+  color: var(--clr-primary); font-weight: 700;
+  font-size: 0.875rem; cursor: pointer;
+  transition: var(--transition); font-family: var(--font-body);
+  padding: 0;
+}
+.auth-toggle-btn:hover { color: var(--clr-secondary); text-decoration: underline; }
+
+/* ── Password Strength ── */
+.password-strength { margin: -0.1rem 0 0; }
+.strength-bar {
+  height: 4px; width: 100%;
+  background: var(--clr-surface-3);
+  border-radius: 2px; overflow: hidden; margin-bottom: 0.3rem;
+}
+.strength-fill {
+  height: 100%; width: 0;
+  border-radius: 2px;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+.strength-label { font-size: 0.72rem; color: var(--clr-text-muted); }
+
+/* OTP input */
+.otp-input {
+  letter-spacing: 0.4em; font-size: 1.4rem;
+  text-align: center; font-weight: 700;
+}
+
+/* ── Signup Avatar Upload ── */
+.signup-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--clr-surface-2);
+  border: 1px dashed var(--clr-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.signup-avatar-row:hover { border-color: var(--clr-primary); background: rgba(108,99,255,0.05); }
+
+.signup-avatar-zone {
+  position: relative;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+.signup-avatar-preview {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--clr-border);
+  display: block;
+  transition: filter 0.2s;
+}
+.signup-avatar-zone:hover .signup-avatar-preview { filter: brightness(0.6); }
+.signup-avatar-overlay {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(108,99,255,0.6);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 0.9rem; gap: 0.1rem;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none;
+}
+.signup-avatar-hint { font-size: 0.5rem; font-weight: 700; color: #fff; text-transform: uppercase; }
+.signup-avatar-zone:hover .signup-avatar-overlay { opacity: 1; }
+
+.signup-avatar-label { flex: 1; }
+.signup-avatar-main { display: block; font-size: 0.875rem; font-weight: 600; color: var(--clr-text); margin-bottom: 0.2rem; }
+.signup-avatar-sub  { font-size: 0.72rem; color: var(--clr-text-muted); }
+
+/* ── Responsive Mobile Polish ── */
+@media (max-width: 860px) {
+  .auth-container {
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    /* Rich background for mobile */
+    background: linear-gradient(135deg, #080b12 0%, #111524 50%, #080b12 100%);
+    position: relative;
+  }
+  
+  /* Add subtle background orbs for mobile */
+  .auth-container::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(circle at top left, rgba(108,99,255,0.15), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(0,212,170,0.1), transparent 40%);
+  }
+
+  .auth-panel {
+    width: 100%;
+    max-width: 420px;
+    min-height: auto;
+    padding: 3rem 2rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 19, 32, 0.95);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(108, 99, 255, 0.1);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+  }
+  
+  .auth-title { font-size: 1.6rem; margin-bottom: 1.5rem; }
+  .panel-inner { gap: 0.5rem; }
+
+  .auth-overlay { display: none; }
+
+  /* On mobile, show whichever panel matches mode */
+  .auth-container[data-mode="login"]  .auth-panel--signup { display: none !important; }
+  .auth-container[data-mode="signup"] .auth-panel--login  { display: none !important; }
+  
+  .auth-container[data-mode="login"]  .auth-panel--login  { 
+    display: flex !important; opacity: 1 !important; pointer-events: auto !important;
+    animation: mobile-slide-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .auth-container[data-mode="signup"] .auth-panel--signup { 
+    display: flex !important; opacity: 1 !important; pointer-events: auto !important;
+    animation: mobile-slide-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes mobile-slide-fade {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Step 2 — Gender | FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/onboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="onboard-wrapper">
+  <div class="onboard-progress">
+    <div class="progress-bar"><div class="progress-fill" style="width: 33.3%"></div></div>
+    <span class="progress-label">Step 2 of 6</span>
+  </div>
+  <div class="onboard-card">
+    <div class="onboard-icon">👤</div>
+    <h2 class="onboard-title">What is your gender?</h2>
+    <p class="onboard-sub">This helps us tailor your programme more accurately.</p>
+    <form method="POST" action="{{ url_for('onboarding.step2') }}" class="onboard-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="choice-grid">
+        <label class="choice-card {% if profile.gender == 'male' %}selected{% endif %}">
+          <input type="radio" name="gender" value="male" {% if profile.gender == 'male' %}checked{% endif %} />
+          <span class="choice-icon">♂️</span>
+          <span class="choice-label">Male</span>
+        </label>
+        <label class="choice-card {% if profile.gender == 'female' %}selected{% endif %}">
+          <input type="radio" name="gender" value="female" {% if profile.gender == 'female' %}checked{% endif %} />
+          <span class="choice-icon">♀️</span>
+          <span class="choice-label">Female</span>
+        </label>
+        <label class="choice-card {% if profile.gender == 'non_binary' %}selected{% endif %}">
+          <input type="radio" name="gender" value="non_binary" {% if profile.gender == 'non_binary' %}checked{% endif %} />
+          <span class="choice-icon">⚧️</span>
+          <span class="choice-label">Non-binary</span>
+        </label>
+        <label class="choice-card {% if profile.gender == 'prefer_not' %}selected{% endif %}">
+          <input type="radio" name="gender" value="prefer_not" {% if profile.gender == 'prefer_not' %}checked{% endif %} />
+          <span class="choice-icon">🤐</span>
+          <span class="choice-label">Prefer not to say</span>
+        </label>
+      </div>
+      <button type="submit" class="btn-onboard">Continue <span>→</span></button>
+    </form>
+  </div>
+</div>
+{% endblock %}

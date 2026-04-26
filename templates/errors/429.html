@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Rate Limited — FitAI{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="error-illustration">⏳</div>
+  <div class="error-code">429</div>
+  <h1 class="error-title">Slow Down, Champ!</h1>
+  <p class="error-sub">You're making requests too fast. Take a short rest and try again.</p>
+  <div class="timer-container">
+    <div class="timer-text">Retrying in <span id="countdown">60</span>s</div>
+    <div class="timer-progress-container">
+      <div class="timer-progress-bar" id="timer-progress"></div>
+    </div>
+  </div>
+  <div class="error-actions">
+    <a href="{{ url_for('dashboard.index') }}" class="btn-primary">🏠 Back to Dashboard</a>
+  </div>
+</div>
+{% block extra_js %}
+<script>
+  (function() {
+    let timeLeft = 60;
+    const TOTAL = 60;
+    const countdownEl = document.getElementById('countdown');
+    const progressEl = document.getElementById('timer-progress');
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      if (countdownEl) countdownEl.textContent = timeLeft;
+      if (progressEl) {
+        const pct = (timeLeft / TOTAL) * 100;
+        progressEl.style.width = pct + '%';
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        // Attempt to go back to dashboard after wait
+        window.location.href = "{{ url_for('dashboard.index') }}";
+      }
+    }, 1000);
+  })();
+</script>
+{% endblock %}
+{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/errors.css') }}" />{% endblock %}

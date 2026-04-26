@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}AI Coach — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ai_coach.css') }}" />{% endblock %}
+{% block content %}
+<div class="coach-wrapper fade-in-v2">
+
+  <div class="coach-header">
+    <div class="coach-avatar-wrap">
+      <div class="coach-avatar">🤖</div>
+      <div class="coach-avatar-ring"></div>
+    </div>
+    <div>
+      <h1 class="coach-title">FitAI Coach</h1>
+      <p class="coach-subtitle">Your personal AI-powered fitness expert</p>
+    </div>
+    <a href="{{ url_for('ai.daily') }}" class="btn-secondary">📋 View Daily Plan</a>
+  </div>
+
+  {% if not ai_available %}
+  <div class="ai-no-key-banner">
+    <span class="no-key-icon">⚠️</span>
+    <div>
+      <strong>AI not connected.</strong>
+      Add your free <a href="https://aistudio.google.com/app/apikey" target="_blank" class="auth-link">Gemini API key</a>
+      to <code>.env</code> as <code>GEMINI_API_KEY=your-key</code> then restart the server.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Suggested questions -->
+  <div class="suggestions-bar" id="suggestions-bar">
+    <span class="suggestions-label">Try asking:</span>
+    <button class="suggestion-chip" data-msg="What should I eat before a workout?">🍌 Pre-workout meal?</button>
+    <button class="suggestion-chip" data-msg="How many calories should I eat to lose weight?">🔥 Calories for weight loss?</button>
+    <button class="suggestion-chip" data-msg="Create a quick 20-minute home workout for me.">💪 20-min home workout</button>
+    <button class="suggestion-chip" data-msg="How long until I see muscle gains?">📈 When will I see results?</button>
+    <button class="suggestion-chip" data-msg="What are the best exercises to improve my posture?">🧍 Fix my posture</button>
+  </div>
+
+  <!-- Chat window -->
+  <div class="chat-window" id="chat-window">
+    <!-- AI greeting -->
+    <div class="chat-msg chat-msg--ai" id="greeting-msg">
+      <div class="chat-bubble chat-bubble--ai">
+        <p>Hey {{ current_user.username }}! 👋 I'm your FitAI Coach.</p>
+        <p style="margin-top:0.5rem;">
+          I know your goals, stats, and experience level, so my advice is personalised just for you.
+          Ask me anything — workouts, nutrition, recovery, or motivation!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typing indicator -->
+  <div class="typing-indicator" id="typing-indicator" style="display:none;">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="chat-input-bar">
+    <textarea
+      id="chat-input"
+      class="chat-input"
+      placeholder="Ask your AI coach anything…"
+      rows="1"
+      maxlength="1000"
+    ></textarea>
+    <button class="btn-voice" id="voice-btn" aria-label="Voice input" title="Voice input" style="display:none;">
+      🎤
+    </button>
+    <button class="btn-send" id="send-btn" aria-label="Send message">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  window.CHAT_API_URL = "{{ url_for('ai.chat_api') }}";
+  window.USER_NAME = "{{ current_user.username }}";
+</script>
+<script src="{{ url_for('static', filename='js/ai_coach.js') }}"></script>
+{% endblock %}

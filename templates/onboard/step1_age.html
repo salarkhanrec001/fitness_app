@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Step 1 — How Old Are You? | FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/onboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="onboard-wrapper">
+  <div class="onboard-progress">
+    <div class="progress-bar"><div class="progress-fill" style="width: 16.6%"></div></div>
+    <span class="progress-label">Step 1 of 6</span>
+  </div>
+  <div class="onboard-card">
+    <div class="onboard-icon">🎂</div>
+    <h2 class="onboard-title">How old are you?</h2>
+    <p class="onboard-sub">We use your age to personalise your fitness plan safely.</p>
+    <form method="POST" action="{{ url_for('onboarding.step1') }}" class="onboard-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group">
+        <label for="age" class="form-label">Age (years)</label>
+        <input
+          type="number"
+          id="age"
+          name="age"
+          class="form-input onboard-input"
+          placeholder="e.g. 28"
+          value="{{ profile.age or '' }}"
+          min="10"
+          max="100"
+          required
+          autofocus
+        />
+      </div>
+      <button type="submit" class="btn-onboard">Continue <span>→</span></button>
+    </form>
+  </div>
+</div>
+{% endblock %}

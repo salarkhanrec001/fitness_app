@@ -1,0 +1,404 @@
+{% extends "base.html" %} {% block title %}Dashboard — FitAI{% endblock %} {%
+block extra_css %}<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>{% endblock %} {% block content %}
+<div class="dashboard-wrapper fade-in-v2">
+  <!-- ── AI Coach Insight (AAA Level) ── -->
+  <a href="{{ url_for('ai.coach') }}" class="dash-section coach-insight-section premium-card" style="display: block; text-decoration: none; padding: 1.5rem 2rem; border-left: 4px solid var(--clr-primary); background: linear-gradient(90deg, rgba(108, 99, 255, 0.05), transparent);">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 2rem;">💡</div>
+        <div>
+          <span style="display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--clr-primary); margin-bottom: 0.25rem;">FitAI Coach Insight</span>
+          <p style="margin: 0; font-size: 1rem; color: var(--clr-text); font-weight: 500;">{{ coach_insight }}</p>
+        </div>
+      </div>
+      <div style="color: var(--clr-primary); font-weight: 800; font-size: 0.9rem;">Chat Now →</div>
+    </div>
+  </a>
+
+  <!-- ── Hero Greeting ── -->
+  <section class="dash-hero">
+    <div class="dash-hero-text">
+      <h1 class="dash-greeting">Hey, {{ current_user.username }} 👋</h1>
+      <p class="dash-sub">Ready to crush today's workout?</p>
+    </div>
+    <div class="dash-hero-streak">
+      {% if streak and streak.display_streak > 0 %}
+      <div
+        class="streak-badge {% if streak.display_streak >= 7 %}streak-badge--fire{% endif %}"
+      >
+        <span class="streak-fire" id="streak-flame">🔥</span>
+        <span
+          class="streak-count count-up"
+          data-target="{{ streak.display_streak if streak and streak.display_streak else 0 }}"
+          >0</span
+        >
+        <span class="streak-label">day streak</span>
+      </div>
+      {% else %}
+      <div class="streak-badge streak-badge--empty">
+        <span class="streak-fire">💤</span>
+        <span class="streak-label">Start your streak today!</span>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ── Stat Cards (with count-up animation) ── -->
+  {% if profile %}
+  <section class="dash-stats">
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-body">
+        <span class="stat-value bmi-{{ profile.bmi_color }}"
+          >{{ '%.1f' | format(profile.bmi) if profile.bmi else '—' }}</span
+        >
+        <span class="stat-label">BMI</span>
+        <span class="stat-sub">{{ profile.bmi_category }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚖️</div>
+      <div class="stat-body">
+        <span
+          class="stat-value count-up"
+          data-target="{{ profile.weight_kg if profile.weight_kg else 0 }}"
+          data-suffix=" kg"
+          >0 kg</span
+        >
+        <span class="stat-label">Weight</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-body">
+        <span class="stat-value count-up" data-target="{{ completed_goals }}"
+          >0</span
+        >
+        <span class="stat-label">Goals Done</span>
+      </div>
+    </div>
+    {% if streak %}
+    <div class="stat-card">
+      <div class="stat-icon">💪</div>
+      <div class="stat-body">
+        <span
+          class="stat-value count-up"
+          data-target="{{ streak.total_workouts }}"
+          >0</span
+        >
+        <span class="stat-label">Total Workouts</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏅</div>
+      <div class="stat-body">
+        <span
+          class="stat-value count-up"
+          data-target="{{ streak.longest_streak }}"
+          >0</span
+        >
+        <span class="stat-label">Best Streak</span>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <!-- ── AAA Achievements (Phase 4) ── -->
+  <section class="dash-section achievements-section">
+    <div class="section-header">
+      <h2 class="section-title">🏅 Your Achievements</h2>
+    </div>
+    <div style="display: flex; gap: 1.5rem; overflow-x: auto; padding: 0.5rem 0 1rem; scrollbar-width: none;">
+      <!-- Onboarding Badge (Always Unlocked for dash) -->
+      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px;">
+        <div class="premium-card" style="width: 80px; height: 80px; background: linear-gradient(135deg, rgba(0, 212, 170, 0.2), rgba(0, 212, 170, 0.05)); border: 1px solid var(--clr-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; box-shadow: 0 0 15px rgba(0, 212, 170, 0.2);">
+          <span style="font-size: 2rem;">🌱</span>
+        </div>
+        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">First Step</span>
+        <span style="font-size: 0.6rem; color: var(--clr-success); font-weight: 800; text-transform: uppercase;">Unlocked</span>
+      </div>
+
+      <!-- Challenge Badge (Locked/Unlocked) -->
+      {% set streak_val = streak.display_streak if streak else 0 %}
+      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if completion_pct and completion_pct >= 25 %}1{% else %}0.4{% endif %};">
+        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+          <span style="font-size: 2rem; filter: {% if not completion_pct or completion_pct < 25 %}grayscale(1){% endif %};">🛡️</span>
+        </div>
+        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">Iron Core</span>
+        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">{% if completion_pct and completion_pct >= 25 %}Unlocked{% else %}Locked{% endif %}</span>
+      </div>
+
+      <!-- Streak Badge (Locked/Unlocked) -->
+      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if streak_val >= 7 %}1{% else %}0.4{% endif %};">
+        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+          <span style="font-size: 2rem; filter: {% if streak_val < 7 %}grayscale(1){% endif %};">🔥</span>
+        </div>
+        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">7-Day Blaze</span>
+        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">{% if streak_val >= 7 %}Unlocked{% else %}Locked{% endif %}</span>
+      </div>
+
+      <!-- Morning Hero Badge (Always Locked for now) -->
+      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: 0.4;">
+        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+          <span style="font-size: 2rem; filter: grayscale(1);">🌅</span>
+        </div>
+        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">Morning Hero</span>
+        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">Locked</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Analytics Charts ── -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2 class="section-title">📈 Progress Analytics</h2>
+    </div>
+    <div class="charts-grid">
+      <!-- Workouts per week -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">💪 Workouts per Week</span>
+          <span class="chart-card-sub">Last 8 weeks</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="workoutsChart"></canvas>
+        </div>
+      </div>
+      <!-- Weight trend -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">⚖️ Weight Trend</span>
+          <span class="chart-card-sub">kg over time</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Weekly Workout Roadmap ── -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2 class="section-title">🗓️ Weekly Workout Roadmap</h2>
+      <span class="weekly-roadmap-meta">Built from your current plan</span>
+    </div>
+    <div class="weekly-roadmap">
+      <div class="weekly-roadmap-summary">
+        <a
+          href="{{ url_for('exercise.workout') }}#weekly-schedule"
+          class="weekly-summary-card weekly-summary-link"
+          aria-label="Open workout hub for today's session"
+        >
+          <span class="weekly-summary-label">Today</span>
+          <strong class="weekly-summary-title">
+            {{ weekly_today.day }} · {{ weekly_today.title }}
+          </strong>
+          <p class="weekly-summary-note">{{ weekly_today.note }}</p>
+        </a>
+        <a
+          href="{{ url_for('exercise.workout') }}#weekly-schedule"
+          class="weekly-summary-card weekly-summary-card--accent weekly-summary-link"
+          aria-label="Open workout hub for your next workout"
+        >
+          <span class="weekly-summary-label">Next workout</span>
+          <strong class="weekly-summary-title">
+            {{ weekly_next_workout.day }} · {{ weekly_next_workout.title }}
+          </strong>
+          <p class="weekly-summary-note">{{ weekly_next_workout.note }}</p>
+        </a>
+      </div>
+      <div class="weekly-roadmap-progress">
+        <div class="weekly-roadmap-progress__header">
+          <span class="weekly-roadmap-progress__label">Weekly completion</span>
+          <strong class="weekly-roadmap-progress__value"
+            >{{ weekly_completed_sessions }}/{{ weekly_scheduled_sessions }}
+            workouts</strong
+          >
+        </div>
+        <meter
+          class="weekly-progress-meter"
+          min="0"
+          max="100"
+          value="{{ weekly_progress_percent }}"
+          aria-label="Weekly workout completion"
+        ></meter>
+      </div>
+      <div class="weekly-roadmap-grid">
+        {% for day in weekly_roadmap %}
+        <a
+          href="{{ url_for('exercise.workout') }}#weekly-schedule"
+          class="weekly-day-card weekly-day-link weekly-day-card--{{ day.kind }} {% if day.is_today %}weekly-day-card--today{% endif %} {% if day.is_completed %}weekly-day-card--completed{% endif %}"
+          aria-label="Open workout hub for {{ day.day }}: {{ day.title }}"
+        >
+          <span class="weekly-day-label">{{ day.day }}</span>
+          <h3 class="weekly-day-title">{{ day.title }}</h3>
+          <p class="weekly-day-note">{{ day.note }}</p>
+          <span class="weekly-day-kind">{{ day.kind | capitalize }}</span>
+          {% if day.is_completed %}
+          <span class="weekly-day-status">Completed</span>
+          {% elif day.kind != "rest" %}
+          <span class="weekly-day-status weekly-day-status--pending"
+            >Open workout</span
+          >
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Active Goals with animated progress bars ── -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2 class="section-title">🎯 Current Goals</h2>
+      <a href="{{ url_for('goals.index') }}" class="btn-secondary">View All</a>
+    </div>
+    {% if goals %}
+    <div class="goals-mini-grid">
+      {% for goal in goals %}
+      <div class="goal-mini-card premium-card">
+        <div class="goal-mini-header">
+          <span class="goal-mini-title">{{ goal.title }}</span>
+          <span class="goal-mini-pct">{{ goal.progress_percent }}%</span>
+        </div>
+        <div class="goal-progress-bar">
+          <div
+            class="goal-progress-fill animate-fill"
+            style="width: 0%"
+            data-target="{{ goal.progress_percent }}"
+          ></div>
+        </div>
+        {% if goal.target_value %}
+        <small class="goal-mini-meta"
+          >{{ goal.current_value }} / {{ goal.target_value }} {{ goal.unit
+          }}</small
+        >
+        {% endif %}
+        {% if goal.deadline %}
+        <div class="goal-mini-deadline" data-deadline="{{ goal.deadline.isoformat() }}">
+          ⏳ <span class="countdown-timer">Calculating...</span>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🎯</div>
+      <h3 class="empty-state-title">No active goals yet</h3>
+      <p class="empty-state-text">
+        Setting goals is the first step to crushing them! What's your next
+        milestone?
+      </p>
+      <a href="{{ url_for('goals.index') }}" class="btn-primary"
+        >Set Your First Goal</a
+      >
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ── Featured Challenges ── -->
+  <section class="dash-section challenges-section">
+    <div class="section-header">
+      <h2 class="section-title">🔥 Featured Challenges</h2>
+    </div>
+    <div class="challenge-card premium-card six-pack-challenge">
+      <div class="challenge-content">
+        <div class="challenge-badge fade-in-v2">Limited Time</div>
+        <h3 class="challenge-name">30-Day Six Pack Challenge</h3>
+        <p class="challenge-text">Get shredded with our elite core-focused training programme. Expert-curated 30-day progression.</p>
+        <div class="challenge-actions" style="display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem;">
+          <a href="{{ url_for('onboarding.start_challenge', challenge_type='six_pack') }}" class="btn-primary">Start Challenge <span>→</span></a>
+          <a href="{{ url_for('ai.challenge_six_pack') }}" class="btn-link" style="color: var(--clr-text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">View Exercises</a>
+        </div>
+      </div>
+      <div class="challenge-icon">🏆</div>
+    </div>
+  </section>
+
+  <!-- ── Active Fitness Plan ── -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2 class="section-title">🤖 Your AI Fitness Plan</h2>
+      <a href="{{ url_for('ai.daily') }}" class="btn-secondary"
+        >AI Daily Plan</a
+      >
+    </div>
+    {% if active_plan %}
+    <div class="plan-card">
+      <div class="plan-card-header">
+        <h3 class="plan-title">{{ active_plan.title }}</h3>
+        <span class="plan-badge"
+          >{{ active_plan.experience_level | capitalize }}</span
+        >
+      </div>
+      <p class="plan-desc">{{ active_plan.description }}</p>
+      <a href="{{ url_for('exercise.workout') }}" class="btn-primary"
+        >View Full Plan →</a
+      >
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>
+        No plan yet.
+        <a href="{{ url_for('ai.daily') }}" class="auth-link"
+          >Generate one now →</a
+        >
+      </p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ── Quick Actions ── -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2 class="section-title">⚡ Quick Actions</h2>
+    </div>
+    <div class="quick-actions">
+      <a href="{{ url_for('exercise.workout') }}" class="quick-action-card">
+        <span class="qa-icon">💪</span>
+        <span class="qa-label">Start Workout</span>
+      </a>
+      <a href="{{ url_for('goals.index') }}" class="quick-action-card">
+        <span class="qa-icon">🎯</span>
+        <span class="qa-label">Manage Goals</span>
+      </a>
+      <a href="{{ url_for('ai.daily') }}" class="quick-action-card">
+        <span class="qa-icon">🤖</span>
+        <span class="qa-label">AI Daily Plan</span>
+      </a>
+      <a href="{{ url_for('ai.coach') }}" class="quick-action-card">
+        <span class="qa-icon">💬</span>
+        <span class="qa-label">AI Coach Chat</span>
+      </a>
+      <a href="{{ url_for('social.friends') }}" class="quick-action-card">
+        <span class="qa-icon">👥</span>
+        <span class="qa-label">Find Friends</span>
+      </a>
+      <a href="{{ url_for('profile.index') }}" class="quick-action-card">
+        <span class="qa-icon">👤</span>
+        <span class="qa-label">My Profile</span>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %} {% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<script type="application/json" id="dashboard-data">
+  {{ {
+    "chartLabels": chart_labels | default([]),
+    "chartWorkouts": chart_workouts | default([]),
+    "weightLabels": weight_labels | default([]),
+    "weightData": weight_data | default([]),
+    "streakCount": streak.display_streak | default(0)
+  } | tojson }}
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

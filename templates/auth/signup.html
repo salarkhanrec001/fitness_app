@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Create Account — FitAI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />{% endblock %}
+{% block content %}
+{# Redirect to the combined auth page in signup mode #}
+<script>window.location.replace("{{ url_for('auth.auth_page') }}?mode=signup");</script>
+{% endblock %}
