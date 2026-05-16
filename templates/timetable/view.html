@@ -71,7 +71,8 @@
   {% set day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
   <div class="stagger-3">
     <h2 class="section-title">🗓️ Weekly Overview</h2>
-    <div class="week-view">
+    <div class="week-view" style="position: relative;">
+      <div id="tt-live-line" class="tt-live-indicator"></div>
       {% for day_idx in range(7) %}
       {% set day_slots = slots_by_day.get(day_idx, []) %}
       
@@ -81,7 +82,10 @@
         {% if day_slots %}
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             {% for slot in day_slots %}
-            <div class="premium-slot-card {% if slot.is_completed %}done{% endif %}" style="--tt-color: {{ timetable.color }};">
+            <div class="premium-slot-card {% if slot.is_completed %}done{% endif %} mm-slot" 
+                 data-start="{{ slot.start_time }}" 
+                 data-end="{{ slot.end_time }}"
+                 style="--tt-color: {{ timetable.color }};">
               <div class="slot-time">{{ slot.start_time_12 }} – {{ slot.end_time_12 }}</div>
               <div class="slot-task">{{ slot.task }}</div>
               <span class="category-badge cat-{{ slot.category }}">{{ slot.category }}</span>
@@ -116,4 +120,51 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const line = document.getElementById('tt-live-line');
+        const slots = document.querySelectorAll('.mm-slot');
+        const weekView = document.querySelector('.week-view');
+        
+        function updateTimeline() {
+            const now = new Date();
+            const currentDay = (now.getDay() + 6) % 7; // Monday is 0
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+            const totalMin = currentHour * 60 + currentMin;
+            
+            // 1. Highlight Active Slot
+            slots.forEach(slot => {
+                const start = slot.dataset.start.split(':').map(Number);
+                const end = slot.dataset.end.split(':').map(Number);
+                const startMin = start[0] * 60 + start[1];
+                const endMin = end[0] * 60 + end[1];
+                
+                const parentColumn = slot.closest('.premium-day-column');
+                const dayIdx = Array.from(document.querySelectorAll('.premium-day-column')).indexOf(parentColumn);
+                
+                if (dayIdx === currentDay && totalMin >= startMin && totalMin <= endMin) {
+                    slot.classList.add('active-now');
+                } else {
+                    slot.classList.remove('active-now');
+                }
+            });
+            
+            // 2. Position Live Line
+            // (Simplification: Position relative to the week-view height based on 00:00 to 23:59)
+            if (line && weekView) {
+                const height = weekView.offsetHeight;
+                const topPercent = (totalMin / 1440) * 100;
+                line.style.top = topPercent + '%';
+                line.style.display = 'block';
+            }
+        }
+        
+        updateTimeline();
+        setInterval(updateTimeline, 60000); // Update every minute
+    });
+</script>
 {% endblock %}
