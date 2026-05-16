@@ -49,6 +49,14 @@ def utc_date(d: Optional[datetime] = None):
     return dt.date()
 
 
+def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
+
+
 def clamp_day_index(day_index: int) -> int:
     if day_index < 1:
         return 1
@@ -82,7 +90,7 @@ def compute_today_deadline_window(progress: MonkModeProgress) -> Tuple[datetime,
     )
     if not day:
         raise ValueError("Monk Mode days not initialized (start required).")
-    start = day.deadline_at
+    start = ensure_utc(day.deadline_at)
     end = start + timedelta(hours=24)
     return start, end
 
@@ -571,7 +579,7 @@ def complete_task():
             return jsonify({"ok": False, "error": f"Deadline calc failed: {e}"}), 409
 
         now = utc_now()
-        if now >= deadline_end:
+        if now >= ensure_utc(deadline_end):
             reset_moniker(progress, reason="Missed 24h deadline (task completion too late)")
             db.session.add(MonkModeLog(progress_id=progress.id, action="fail", message="Missed 24h deadline (task)"))
             db.session.commit()
