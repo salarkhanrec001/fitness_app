@@ -1,0 +1,245 @@
+{% set status = monk.status if monk else "not_started" %}
+<section class="monk-mode-section" aria-label="Monk Mode — 90 Day Rebirth Protocol"
+  data-status-url="{{ url_for('monk_mode.status') }}"
+  data-start-url="{{ url_for('monk_mode.monk_start') }}"
+  data-complete-task-url="{{ url_for('monk_mode.complete_task') }}"
+  data-complete-day-url="{{ url_for('monk_mode.complete_day') }}">
+
+  <div class="monk-mode-header">
+    <div class="monk-mode-title-wrap">
+      <span class="monk-mode-logo">🜁</span>
+      <div class="monk-mode-title-block">
+        <h3 class="monk-mode-title">MONK MODE</h3>
+        <p class="monk-mode-subtitle">90 Day Rebirth Protocol — No Mercy</p>
+      </div>
+    </div>
+    <div class="monk-mode-header-actions">
+      <div class="monk-sound-toggle" title="Toggle sound effects">
+        <button class="monk-toggle-btn" id="monk-sfx-btn" type="button" aria-pressed="false">
+          <span class="monk-sfx-icon" aria-hidden="true">🔇</span>
+          <span class="monk-sfx-text">SFX</span>
+        </button>
+      </div>
+      {% if status != "active" %}
+      <button class="btn-primary monk-start-btn" type="button" data-monk-action="open">
+        ☠️ Start Monk Mode
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="monk-mode-body">
+    <div class="monk-cinematic-bg" aria-hidden="true">
+      <div class="monk-particles"></div>
+      <div class="monk-smoke"></div>
+    </div>
+
+    <!-- RULES BANNER (always visible) -->
+    <div class="monk-rules-banner premium-card">
+      <div class="monk-rules-header-row">
+        <div class="monk-rules-badge">⚠️ IRON RULES</div>
+        <div class="monk-rules-subtitle">Break one → Reset to Day 1</div>
+      </div>
+      <div class="monk-rules-list">
+        <div class="monk-rule-item"><span class="monk-rule-dot"></span>Complete ALL 16 tasks every day — no exceptions</div>
+        <div class="monk-rule-item"><span class="monk-rule-dot"></span>Miss one day = full reset (streak, badges, progress)</div>
+        <div class="monk-rule-item"><span class="monk-rule-dot"></span>24h UTC deadline enforced server-side — no cheating</div>
+        <div class="monk-rule-item"><span class="monk-rule-dot"></span>No pause, no skip, no resume — 90 days straight</div>
+      </div>
+    </div>
+
+    <!-- Live Progress Panel -->
+    <div class="monk-live-panel premium-card">
+      <div class="monk-live-top">
+        <div class="monk-mission">
+          <div class="monk-mission-label">Today's Mission</div>
+          <div class="monk-mission-text" id="monk-today-mission">
+            {% if status == "active" %}Complete every mandatory task. No excuses.
+            {% else %}Locked. Begin transformation to reveal today's mission.{% endif %}
+          </div>
+          <div class="monk-mission-quote" id="monk-mission-quote">
+            No distractions. No excuses. No weakness.
+          </div>
+        </div>
+
+        <div class="monk-stats">
+          <div class="monk-ring-wrap">
+            <div class="monk-progress-ring" role="img" aria-label="Monk mode completion percentage">
+              <svg width="132" height="132" viewBox="0 0 132 132" class="monk-ring-svg" aria-hidden="true">
+                <circle class="monk-ring-bg" cx="66" cy="66" r="52"/>
+                <circle class="monk-ring-fg" cx="66" cy="66" r="52" stroke-linecap="round"/>
+              </svg>
+              <div class="monk-ring-center">
+                <div class="monk-ring-value" id="monk-completion-pct">
+                  {% if monk and monk.level %}{{ monk.level.progress_percent }}{% else %}0{% endif %}%
+                </div>
+                <div class="monk-ring-label">in this level</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="monk-streak-block">
+            <div class="monk-streak-label">Streak</div>
+            <div class="monk-streak-value" id="monk-streak">
+              {% if monk and monk.streak %}{{ monk.streak }}{% else %}0{% endif %}
+            </div>
+            <div class="monk-streak-meta">Days completed</div>
+          </div>
+
+          <div class="monk-days-remaining">
+            <div class="monk-days-label">Day</div>
+            <div class="monk-days-value" id="monk-current-day">
+              {% if monk and monk.current_day %}{{ monk.current_day }}{% else %}1{% endif %}
+              <span class="monk-days-total">/ 90</span>
+            </div>
+            <div class="monk-days-sub" id="monk-phase">
+              {% if monk and monk.level %}Level: {{ monk.level.level_key|replace('_',' ')|title }}
+              {% else %}Level locked.{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily tasks checklist -->
+      <div class="monk-tasks">
+        <div class="monk-tasks-header">
+          <div class="monk-tasks-title">⛓️ Mandatory Daily Contracts</div>
+          <div class="monk-tasks-sub">Failure = full reset. One missing task ends the run.</div>
+        </div>
+
+        <form class="monk-task-form" id="monk-task-form" onsubmit="return false;">
+          <div class="monk-task-grid" id="monk-task-grid">
+            {% if status == "active" and monk.tasks %}
+            {% for t in monk.tasks %}
+            <div class="monk-task-item" data-task-key="{{ t.task_key }}">
+              <label class="monk-checkbox monk-checkbox--anim">
+                <input type="checkbox" class="monk-task-checkbox" value="{{ t.task_key }}"
+                  {% if t.status=="completed" %}checked{% endif %}
+                  {% if t.status !="pending" and t.status !="completed" %}disabled{% endif %}/>
+                <span class="monk-checkbox-ui" aria-hidden="true"></span>
+                <span class="monk-task-text">
+                  {% if t.task_key == "workout_completed" %}Workout completed
+                  {% elif t.task_key == "cardio_completed" %}Cardio completed
+                  {% elif t.task_key == "water_intake" %}Water intake
+                  {% elif t.task_key == "protein_goal" %}Protein goal
+                  {% elif t.task_key == "calorie_target" %}Calorie target
+                  {% elif t.task_key == "sleep_target" %}Sleep target
+                  {% elif t.task_key == "meditation" %}Meditation
+                  {% elif t.task_key == "reading" %}Reading
+                  {% elif t.task_key == "mindset_training" %}Mindset training
+                  {% elif t.task_key == "no_junk_food" %}No junk food
+                  {% elif t.task_key == "no_sugary_drinks" %}No sugary drinks
+                  {% elif t.task_key == "no_smoking" %}No smoking
+                  {% elif t.task_key == "no_alcohol" %}No alcohol
+                  {% elif t.task_key == "no_pornography" %}No pornography
+                  {% elif t.task_key == "no_skipped_meals" %}No skipped meals
+                  {% elif t.task_key == "social_media_limit" %}Social media limit
+                  {% else %}Task{% endif %}
+                </span>
+              </label>
+              <div class="monk-task-notes">
+                <input type="text" class="monk-task-notes-input" placeholder="Optional notes"
+                  maxlength="120"
+                  {% if t.status !="pending" and t.status !="completed" %}disabled{% endif %}/>
+              </div>
+              <div class="monk-task-status" aria-live="polite">
+                {% if t.status == "completed" %}✓ Completed
+                {% elif t.status == "pending" %}Pending
+                {% else %}🔒 Locked{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="monk-empty">
+              <div class="monk-empty-icon">💀</div>
+              <div class="monk-empty-title">Monk Mode is dormant.</div>
+              <div class="monk-empty-text">Start the protocol to unlock today's mission and the full 90-day grid.</div>
+            </div>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <div class="monk-actions">
+        {% if status == "active" %}
+        <button class="btn-primary monk-complete-day-btn" type="button" data-monk-action="complete-day">
+          ✅ Complete Day & Advance →
+        </button>
+        {% endif %}
+        <div class="monk-legal">
+          <span class="monk-legal-dot" aria-hidden="true"></span>
+          <span>Rule: miss even one day → Day 1. No pause. No skip.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 90-day Grid -->
+    <div class="monk-grid-panel premium-card">
+      <div class="monk-grid-header">
+        <div class="monk-grid-title">
+          90-Day War Grid
+          <span class="monk-grid-badge">Cinematic discipline board</span>
+        </div>
+        <div class="monk-grid-sub">Completed glows. Current day pulses. Locked days blur.</div>
+      </div>
+
+      <div class="monk-grid-scroll">
+        <div class="monk-grid" id="monk-grid">
+          {% if status == "active" %}
+          {% for d in monk.days %}
+          {% set di = d.day_index %}
+          {% set st = d.status %}
+          <button type="button" class="monk-day-card monk-day--{{ st }}" data-day-index="{{ di }}"
+            title="Day {{ di }} — {{ st|title }}" aria-label="Day {{ di }} status {{ st }}">
+            <div class="monk-day-top">
+              <div class="monk-day-number">{{ di }}</div>
+              <div class="monk-day-icon" aria-hidden="true">
+                {% if st == "completed" %}✅{% elif st == "pending" %}🔥{% else %}⛓️{% endif %}
+              </div>
+            </div>
+            <div class="monk-day-state">
+              {% if st == "completed" %}Done{% elif st == "pending" %}NOW{% else %}Locked{% endif %}
+            </div>
+          </button>
+          {% endfor %}
+          {% else %}
+          {% for di in range(1, 91) %}
+          <div class="monk-day-card monk-day--locked monk-day--ghost" aria-label="Day {{ di }} locked" role="img">
+            <div class="monk-day-top">
+              <div class="monk-day-number">{{ di }}</div>
+              <div class="monk-day-icon" aria-hidden="true">⛓️</div>
+            </div>
+            <div class="monk-day-state">Locked</div>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Starter Modal -->
+    <div class="monk-modal-overlay" id="monk-modal-overlay" style="display:none"></div>
+    <div class="monk-modal" id="monk-modal" role="dialog" aria-modal="true" aria-label="Start Monk Mode" style="display:none">
+      <div class="monk-modal-glow" aria-hidden="true"></div>
+      <div class="monk-modal-content">
+        <div class="monk-modal-title">💀 Once you begin, there is no pause.</div>
+        <div class="monk-modal-body">
+          Miss one day… and you return to Day 1. All badges revoked. All progress erased. Are you ready?
+        </div>
+        <div class="monk-modal-rules">
+          <div class="monk-modal-rule">✗ No days off for 90 days</div>
+          <div class="monk-modal-rule">✗ 16 mandatory tasks per day</div>
+          <div class="monk-modal-rule">✗ Server-enforced UTC deadlines</div>
+          <div class="monk-modal-rule">✗ Miss 1 day = complete reset</div>
+        </div>
+        <div class="monk-modal-actions">
+          <button class="btn-primary" type="button" id="monk-begin-btn">☠️ Begin Transformation</button>
+          <button class="btn-secondary" type="button" id="monk-not-ready-btn">I'm Not Ready</button>
+        </div>
+        <div class="monk-modal-footer">Sound effects are optional. The discipline is mandatory.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/monk_mode.js') }}?v=3"></script>

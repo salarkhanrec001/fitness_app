@@ -24,10 +24,209 @@
       type="image/svg+xml"
       href="{{ url_for('static', filename='images/favicon.svg') }}"
     />
+
+    <!-- Music Player CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/music-player.css') }}?v=4"
+    />
+
+
     {% block extra_css %}{% endblock %}
+
+    <style>
+      /* =========================================
+         AAA Level Premium UI Components (Restored)
+         ========================================= */
+
+      .nav-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .nav-dropdown-toggle {
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        font-size: inherit;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .nav-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 20, 25, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.5rem;
+        min-width: 220px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-dropdown:hover .nav-dropdown-menu {
+        display: block;
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #fff;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 4px;
+      }
+
+      .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateX(6px);
+      }
+
+      .dropdown-icon {
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+      }
+
+      .dropdown-text {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .dropdown-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #f8f9fa;
+        font-family: "Outfit", sans-serif;
+      }
+
+      .dropdown-desc {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        margin-top: 3px;
+      }
+
+      /* Mobile Sheets & FABs (Hidden by default, shown only on mobile) */
+      .mobile-fab,
+      .mobile-bottom-sheet {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-fab {
+          display: flex;
+          position: fixed;
+          bottom: 85px;
+          right: 20px;
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #8b5cf6, #ec4899);
+          color: white;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+          z-index: 900;
+          cursor: pointer;
+          border: none;
+        }
+
+        .mobile-bottom-sheet {
+          display: block;
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          visibility: hidden;
+          pointer-events: none;
+        }
+
+        .mobile-bottom-sheet.open {
+          visibility: visible;
+          pointer-events: auto;
+        }
+
+        .sheet-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(5px);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        .mobile-bottom-sheet.open .sheet-overlay {
+          opacity: 1;
+        }
+
+        .sheet-content {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(20, 20, 25, 0.85);
+          backdrop-filter: blur(25px) saturate(200%);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 28px 28px 0 0;
+          padding: 1.5rem 1.5rem 2.5rem;
+          transform: translateY(100%);
+          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        .mobile-bottom-sheet.open .sheet-content {
+          transform: translateY(0);
+        }
+
+        .sheet-drag-handle {
+          width: 48px;
+          height: 5px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 5px;
+          margin: 0 auto 1.5rem;
+        }
+
+        .sheet-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+        }
+
+        .sheet-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 1.5rem 1rem;
+          border-radius: 20px;
+          text-decoration: none;
+          color: #fff;
+        }
+      }
+    </style>
   </head>
   <body>
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and current_user.onboarding_complete %}
     <!-- ── Top Navbar ── -->
     <nav class="navbar" id="main-navbar">
       <div class="nav-brand">
@@ -67,14 +266,69 @@
         >
           <span>🤖</span> AI Coach
         </a>
+
+        <!-- Motivaura Dropdown (Restored) -->
+        <div class="nav-dropdown">
+          <button
+            class="nav-link nav-dropdown-toggle {% if request.blueprint in ['habits', 'timetable', 'journal', 'achievements', 'focus'] %}active{% endif %}"
+          >
+            <span>✨</span> Motivaura
+            <span style="font-size: 0.7em; opacity: 0.6; margin-left: 2px"
+              >▼</span
+            >
+          </button>
+          <div class="nav-dropdown-menu">
+            <a href="{{ url_for('habits.list_habits') }}" class="dropdown-item">
+              <span class="dropdown-icon">🔁</span>
+              <div class="dropdown-text">
+                <span class="dropdown-title">Habits</span>
+                <span class="dropdown-desc"
+                  >Build consistency & discipline</span
+                >
+              </div>
+            </a>
+            <a
+              href="{{ url_for('timetable.list_timetables') }}"
+              class="dropdown-item"
+            >
+              <span class="dropdown-icon">📅</span>
+              <div class="dropdown-text">
+                <span class="dropdown-title">Schedule</span>
+                <span class="dropdown-desc">Plan your day</span>
+              </div>
+            </a>
+            <a
+              href="{{ url_for('journal.list_entries') }}"
+              class="dropdown-item"
+            >
+              <span class="dropdown-icon">📓</span>
+              <div class="dropdown-text">
+                <span class="dropdown-title">Journal</span>
+                <span class="dropdown-desc">Reflect & track</span>
+              </div>
+            </a>
+            <a href="{{ url_for('achievements.index') }}" class="dropdown-item">
+              <span class="dropdown-icon">🏆</span>
+              <div class="dropdown-text">
+                <span class="dropdown-title">Badges</span>
+                <span class="dropdown-desc">Your achievements</span>
+              </div>
+            </a>
+            <a href="{{ url_for('focus.index') }}" class="dropdown-item">
+              <span class="dropdown-icon">⏱️</span>
+              <div class="dropdown-text">
+                <span class="dropdown-title">Focus</span>
+                <span class="dropdown-desc">Deep work timer</span>
+              </div>
+            </a>
+          </div>
+        </div>
       </div>
       <div class="nav-user">
-        <!-- Dark/Light mode toggle -->
         <button
           class="btn-theme-toggle"
           id="theme-toggle"
           aria-label="Toggle theme"
-          title="Toggle dark/light mode"
         >
           <span id="theme-icon">🌙</span>
         </button>
@@ -84,7 +338,6 @@
             alt="{{ current_user.username }}"
             class="nav-avatar"
             loading="lazy"
-            data-avatar-fallback="{{ url_for('static', filename='images/default_avatar.png') }}"
           />
           <span class="nav-username">{{ current_user.username }}</span>
         </a>
@@ -130,24 +383,54 @@
         <span class="tab-label">Profile</span>
       </a>
     </nav>
+
+    <!-- ── Motivaura Mobile FAB & Sheet ── -->
+    <button class="mobile-fab" id="motivaura-fab">✨</button>
+    <div class="mobile-bottom-sheet" id="motivaura-sheet">
+      <div class="sheet-overlay" id="motivaura-overlay"></div>
+      <div class="sheet-content">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header"><h3>✨ Motivaura</h3></div>
+        <div class="sheet-grid">
+          <a href="{{ url_for('habits.list_habits') }}" class="sheet-item"
+            ><div class="sheet-icon">🔁</div>
+            <div class="sheet-label">Habits</div></a
+          >
+          <a
+            href="{{ url_for('timetable.list_timetables') }}"
+            class="sheet-item"
+            ><div class="sheet-icon">📅</div>
+            <div class="sheet-label">Schedule</div></a
+          >
+          <a href="{{ url_for('journal.list_entries') }}" class="sheet-item"
+            ><div class="sheet-icon">📓</div>
+            <div class="sheet-label">Journal</div></a
+          >
+          <a href="{{ url_for('achievements.index') }}" class="sheet-item"
+            ><div class="sheet-icon">🏆</div>
+            <div class="sheet-label">Badges</div></a
+          >
+          <a href="{{ url_for('focus.index') }}" class="sheet-item"
+            ><div class="sheet-icon">⏱️</div>
+            <div class="sheet-label">Focus</div></a
+          >
+        </div>
+      </div>
+    </div>
+
     {% endif %}
 
-    <!-- ── Toast Notification Container ── -->
-    <div
-      class="toast-container"
-      id="toast-container"
-      role="status"
-      aria-live="polite"
-    >
+    <!-- ── Toast Container ── -->
+    <div class="toast-container" id="toast-container">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
-      <div class="toast toast--{{ category }}" role="alert">
-        <span class="toast-icon">
-          {% if category == 'success' %}✅ {% elif category == 'error' %}❌ {%
-          elif category == 'info' %}ℹ️ {% else %}⚠️{% endif %}
-        </span>
+      <div class="toast toast--{{ category }}">
+        <span class="toast-icon"
+          >{% if category == 'success' %}✅{% elif category == 'error' %}❌{%
+          else %}ℹ️{% endif %}</span
+        >
         <span class="toast-msg">{{ message }}</span>
-        <button class="toast-close" aria-label="Dismiss">×</button>
+        <button class="toast-close">×</button>
         <div class="toast-progress"></div>
       </div>
       {% endfor %} {% endif %} {% endwith %}
@@ -160,7 +443,7 @@
     </main>
 
     <script>
-      // ── Theme toggle (dark/light) ────────────────────────────────
+      // Theme Toggle
       (function () {
         const html = document.documentElement;
         const btn = document.getElementById("theme-toggle");
@@ -168,103 +451,60 @@
         const saved = localStorage.getItem("fitai-theme") || "dark";
         html.dataset.theme = saved;
         if (icon) icon.textContent = saved === "dark" ? "🌙" : "☀️";
-
         if (btn) {
           btn.addEventListener("click", () => {
             const next = html.dataset.theme === "dark" ? "light" : "dark";
             html.dataset.theme = next;
             localStorage.setItem("fitai-theme", next);
-            icon.textContent = next === "dark" ? "🌙" : "☀️";
-            // Animate the button
-            btn.style.transform = "rotate(360deg) scale(1.2)";
-            setTimeout(() => (btn.style.transform = ""), 400);
+            if (icon) icon.textContent = next === "dark" ? "🌙" : "☀️";
           });
         }
       })();
 
-      // Avatar fallback ────────────────────────────────────────
-      document.querySelectorAll(".nav-avatar").forEach((img) => {
-        const fallbackSrc = img.dataset.avatarFallback;
-        if (!fallbackSrc) return;
-        img.addEventListener("error", () => {
-          if (img.dataset.fallbackApplied === "true") return;
-          img.dataset.fallbackApplied = "true";
-          img.src = fallbackSrc;
-        });
-      });
-
-      // ── Toast System ──────────────────────────────────────────
+      // Motivaura Sheet
       (function () {
-        const DURATION = 4000; // ms
+        const fab = document.getElementById("motivaura-fab");
+        const sheet = document.getElementById("motivaura-sheet");
+        const overlay = document.getElementById("motivaura-overlay");
+        if (fab && sheet) {
+          fab.addEventListener("click", () => sheet.classList.add("open"));
+          overlay.addEventListener("click", () =>
+            sheet.classList.remove("open"),
+          );
+        }
+      })();
+
+      // Toast System
+      (function () {
         const container = document.getElementById("toast-container");
         if (!container) return;
-
-        function dismissToast(toast) {
+        function dismiss(toast) {
           toast.classList.add("toast--out");
           setTimeout(() => toast.remove(), 400);
         }
-
-        function initToast(toast) {
-          // Progress bar animation
-          const progress = toast.querySelector(".toast-progress");
-          if (progress) {
-            progress.style.transition = `width ${DURATION}ms linear`;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                progress.style.width = "0%";
-              });
-            });
-          }
-          // Auto-dismiss
-          const timer = setTimeout(() => dismissToast(toast), DURATION);
-          // Manual close
-          const closeBtn = toast.querySelector(".toast-close");
-          if (closeBtn) {
-            closeBtn.addEventListener("click", () => {
-              clearTimeout(timer);
-              dismissToast(toast);
-            });
-          }
-          // Pause on hover — track remaining time to handle re-hover correctly
-          let remaining = DURATION;
-          let startTime = Date.now();
-          toast.addEventListener("mouseenter", () => {
-            clearTimeout(timer);
-            remaining -= Date.now() - startTime;
-          });
-          toast.addEventListener("mouseleave", () => {
-            startTime = Date.now();
-            setTimeout(() => dismissToast(toast), remaining);
-          });
-        }
-
-        // Init pre-rendered toasts (from flash messages)
-        container.querySelectorAll(".toast").forEach(initToast);
-
-        // Expose global function to show toasts from JS
-        window.showToast = function (message, type = "info") {
+        container.querySelectorAll(".toast").forEach((toast) => {
+          setTimeout(() => dismiss(toast), 4000);
+          toast
+            .querySelector(".toast-close")
+            .addEventListener("click", () => dismiss(toast));
+        });
+        window.showToast = function (msg, type = "info") {
           const toast = document.createElement("div");
           toast.className = `toast toast--${type}`;
-          const icons = {
-            success: "✅",
-            error: "❌",
-            info: "ℹ️",
-            warning: "⚠️",
-          };
-          toast.innerHTML = `
-        <span class="toast-icon">${icons[type] || "ℹ️"}</span>
-        <span class="toast-msg">${message}</span>
-        <button class="toast-close" aria-label="Dismiss">×</button>
-        <div class="toast-progress"></div>
-      `;
+          toast.innerHTML = `<span class="toast-icon">ℹ️</span><span class="toast-msg">${msg}</span><button class="toast-close">×</button><div class="toast-progress"></div>`;
           container.appendChild(toast);
-          // Trigger entrance animation
-          requestAnimationFrame(() => toast.classList.add("toast--in"));
-          initToast(toast);
+          setTimeout(() => dismiss(toast), 4000);
+          toast
+            .querySelector(".toast-close")
+            .addEventListener("click", () => dismiss(toast));
         };
       })();
     </script>
 
+
     {% block extra_js %}{% endblock %}
+    
+    <!-- AAA Music Player JS -->
+    <script src="{{ url_for('static', filename='js/music-player.js') }}?v=5"></script>
   </body>
 </html>

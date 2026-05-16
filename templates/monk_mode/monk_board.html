@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Monk Mode — 90 Day Rebirth Protocol{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monk_mode.css') }}?v=1" />
+<style>
+    /* Ensure the board fills the screen correctly when viewed as a full page */
+    .monk-board-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    @media (max-width: 768px) {
+        .monk-board-container {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="monk-board-container fade-in-v2">
+    {% include "monk_mode/_monk_fragment.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- SFX logic and interactivity is handled inside monk_embed.html's scripts -->
+{% endblock %}

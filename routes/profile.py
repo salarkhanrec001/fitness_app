@@ -25,11 +25,14 @@ def _save_avatar(file, user_id):
     try:
         from PIL import Image
         import io
+        import time
 
         ext = file.filename.rsplit(".", 1)[1].lower()
         # Save as JPEG always for consistency (except GIF stays GIF)
         save_ext = "gif" if ext == "gif" else "jpg"
-        filename = f"avatar_{user_id}.{save_ext}"
+        # Add a timestamp to break browser caching
+        timestamp = int(time.time())
+        filename = f"avatar_{user_id}_{timestamp}.{save_ext}"
         upload_folder = current_app.config["UPLOAD_FOLDER"]
         save_path = os.path.join(upload_folder, filename)
 
@@ -45,9 +48,17 @@ def _save_avatar(file, user_id):
         left   = (w - min_dim) // 2
         top    = (h - min_dim) // 2
         img    = img.crop((left, top, left + min_dim, top + min_dim))
-        img    = img.resize(MAX_AVATAR_SIZE, Image.LANCZOS)
+        
+        # Use getattr for compatibility with Pillow >= 10.0
+        resample_filter = getattr(Image, 'Resampling', Image).LANCZOS
+        img    = img.resize(MAX_AVATAR_SIZE, resample_filter)
 
         img.save(save_path, quality=88, optimize=True)
+        # Ensure the web server can read the file
+        try:
+            os.chmod(save_path, 0o644)
+        except OSError:
+            pass
         return filename
 
     except Exception as e:

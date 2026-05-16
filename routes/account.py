@@ -10,6 +10,8 @@ from models.message import Message
 from models.password_reset import PasswordReset
 from models.user import User
 from models.workout_log import WorkoutLog
+from flask_mail import Message as MailMessage
+from extensions import mail
 
 account_bp = Blueprint("account", __name__)
 
@@ -40,11 +42,19 @@ def forgot_password():
             reset = PasswordReset(user_id=user.id)
             db.session.add(reset)
             db.session.commit()
-            # In production, email the OTP; here we flash it for demonstration
-            flash(
-                f"OTP sent! (Demo mode — your OTP is: {reset.otp})",
-                "info",
-            )
+            
+            # Send the OTP via email
+            try:
+                msg = MailMessage(
+                    subject="FitAI Password Reset Code",
+                    recipients=[user.email]
+                )
+                msg.body = f"Hello {user.username},\n\nYour password reset OTP is: {reset.otp}\n\nThis code will expire shortly. If you did not request a password reset, you can safely ignore this email.\n\nBest regards,\nThe FitAI Team"
+                mail.send(msg)
+                flash("An OTP has been sent to your email address.", "success")
+            except Exception as e:
+                current_app.logger.error(f"Failed to send OTP email: {e}")
+                flash(f"Failed to send email. Error: {str(e)}", "error")
         else:
             flash("If that email is registered, you will receive an OTP.", "info")
 

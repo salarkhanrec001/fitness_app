@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Monk Mode — 90-Day War Grid{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monk_mode.css') }}?v=3"/>
+<style>
+.mm-page{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.mm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.mm-title{font-family:var(--font-heading,Outfit);font-weight:950;text-transform:uppercase;letter-spacing:.1em;color:rgba(232,234,240,0.95);font-size:1.3rem;margin:0}
+.mm-sub{margin-top:.4rem;color:rgba(139,146,165,0.95);font-weight:700;font-size:.9rem}
+.mm-card{background:linear-gradient(135deg,rgba(6,8,14,0.85),rgba(15,10,30,0.8));border:1px solid rgba(255,255,255,0.06);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);padding:1.2rem;position:relative;overflow:hidden}
+.mm-card::before{content:"";position:absolute;inset:-2px;background:radial-gradient(600px at 10% 0%,rgba(220,38,38,0.08),transparent 50%);pointer-events:none}
+.mm-card-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;position:relative;z-index:1}
+.mm-card-label{font-weight:950;text-transform:uppercase;letter-spacing:.08em;color:rgba(232,234,240,0.92);font-size:.9rem}
+.mm-streak-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .7rem;border-radius:999px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:#ef4444;font-weight:900;font-size:.82rem}
+.mm-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.55rem;position:relative;z-index:1}
+.mm-day{border-radius:14px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);padding:.65rem .35rem;cursor:pointer;text-align:center;transition:transform .16s,border-color .16s;user-select:none;text-decoration:none;display:block;color:inherit}
+.mm-day:hover{transform:translateY(-2px);border-color:rgba(220,38,38,0.2)}
+.mm-day-num{font-weight:950;color:rgba(232,234,240,0.95);font-size:.95rem}
+.mm-day-st{margin-top:.4rem;font-weight:950;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(139,146,165,0.92)}
+.mm-day--done{border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.1)}
+.mm-day--done .mm-day-st{color:rgba(0,212,170,0.95)}
+.mm-day--now{border-color:rgba(220,38,38,0.3);background:rgba(220,38,38,0.08);box-shadow:0 0 20px rgba(220,38,38,0.08)}
+.mm-day--now .mm-day-st{color:rgba(220,38,38,0.85)}
+.mm-day--lock{opacity:.55;cursor:not-allowed}
+.mm-nav-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(232,234,240,0.85);font-weight:700;font-size:.85rem;text-decoration:none;transition:all .2s}
+.mm-nav-btn:hover{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:#fff}
+@media(max-width:900px){.mm-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:600px){.mm-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mm-page fade-in-v2">
+  <div class="mm-header">
+    <div>
+      <h2 class="mm-title">🜁 90-Day War Grid</h2>
+      <div class="mm-sub">Day {{ monk_current_day }} of 90 — complete all tasks to advance</div>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <a class="mm-nav-btn" href="{{ url_for('monk_mode.monk_day_detail', day_index=monk_current_day) }}">🔥 Current Day</a>
+      <a class="mm-nav-btn" href="{{ url_for('monk_mode.monk_settings_page') }}">⚙️ Settings</a>
+    </div>
+  </div>
+
+  <div class="mm-card">
+    <div class="mm-card-top">
+      <div class="mm-card-label">Tap a day to view details</div>
+      <div class="mm-streak-badge">🔥 Streak: {{ monk_streak or 0 }}</div>
+    </div>
+    <div class="mm-grid">
+      {% for d in days %}
+      {% set st = d.status %}
+      {% set di = d.day_index %}
+      {% if st == 'locked' %}
+      <div class="mm-day mm-day--lock" aria-disabled="true">
+        <div class="mm-day-num">{{ di }}</div>
+        <div class="mm-day-st">🔒</div>
+      </div>
+      {% else %}
+      <a class="mm-day {% if st == 'completed' %}mm-day--done{% elif st == 'pending' %}mm-day--now{% endif %}"
+        href="{{ url_for('monk_mode.monk_day_detail', day_index=di) }}">
+        <div class="mm-day-num">{{ di }}</div>
+        <div class="mm-day-st">{% if st == 'completed' %}✅ Done{% elif st == 'pending' %}🔥 NOW{% else %}Open{% endif %}</div>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

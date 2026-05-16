@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Monk Mode — 90 Day Rebirth Protocol{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monk_mode.css') }}?v=3" />
+<style>
+.mm-start{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.mm-hero{border-radius:22px;padding:2.5rem 2rem;background:linear-gradient(135deg,rgba(6,8,14,0.9),rgba(15,10,30,0.85));border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 80px rgba(0,0,0,0.6);position:relative;overflow:hidden}
+.mm-hero::before{content:"";position:absolute;inset:-2px;background:radial-gradient(800px 300px at 10% 0%,rgba(220,38,38,0.18),transparent 55%),radial-gradient(600px 250px at 90% 40%,rgba(108,99,255,0.12),transparent 55%);pointer-events:none}
+.mm-hero-inner{position:relative;z-index:1}
+.mm-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:999px;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);color:#ef4444;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;animation:mm-pulse-badge 2s ease-in-out infinite}
+@keyframes mm-pulse-badge{0%,100%{box-shadow:0 0 0 rgba(220,38,38,0)}50%{box-shadow:0 0 20px rgba(220,38,38,0.15)}}
+.mm-h1{margin:0;font-family:var(--font-heading,Outfit);letter-spacing:.12em;font-weight:900;color:#fff;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.1;text-shadow:0 0 40px rgba(220,38,38,0.15)}
+.mm-tagline{margin:.6rem 0 0;color:rgba(220,180,180,0.85);font-weight:700;font-size:1rem;letter-spacing:.02em}
+.mm-warn{display:flex;align-items:flex-start;gap:.75rem;margin:1.5rem 0;padding:1rem;border-radius:14px;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.18)}
+.mm-warn-icon{font-size:1.3rem;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(220,38,38,0.3))}
+.mm-warn-text{color:rgba(255,200,200,0.9);font-weight:700;font-size:.9rem;line-height:1.55}
+.mm-rules{display:grid;gap:.65rem;margin:1.5rem 0}
+.mm-rule{display:grid;grid-template-columns:36px 1fr;gap:.75rem;align-items:start;padding:.85rem;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:border-color .2s,transform .2s}
+.mm-rule:hover{border-color:rgba(220,38,38,0.2);transform:translateX(4px)}
+.mm-rule-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:#ef4444;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.2)}
+.mm-rule-title{font-weight:900;color:rgba(232,234,240,0.95);font-size:.92rem;text-transform:uppercase;letter-spacing:.04em}
+.mm-rule-desc{color:rgba(139,146,165,0.9);font-weight:600;font-size:.85rem;line-height:1.5;margin-top:.2rem}
+.mm-tasks-preview{margin:1.5rem 0}
+.mm-tasks-label{font-weight:900;color:rgba(232,234,240,0.9);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
+.mm-tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem}
+.mm-task-pill{padding:.55rem .75rem;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-weight:700;font-size:.8rem;color:rgba(232,234,240,0.75);display:flex;align-items:center;gap:.4rem}
+.mm-task-pill .dot{width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0}
+.mm-levels{margin:1.5rem 0}
+.mm-levels-label{font-weight:900;color:rgba(232,234,240,0.9);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
+.mm-level-bar{display:flex;gap:2px;height:32px;border-radius:8px;overflow:hidden}
+.mm-level-seg{flex:1;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,0.7);transition:filter .2s}
+.mm-level-seg:hover{filter:brightness(1.3)}
+.mm-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;align-items:center}
+.mm-start-btn{display:inline-flex;align-items:center;gap:.6rem;padding:.85rem 2rem;border-radius:12px;border:none;background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;font-weight:800;font-size:1rem;letter-spacing:.04em;cursor:pointer;transition:all .25s;box-shadow:0 8px 30px rgba(220,38,38,0.3);text-transform:uppercase}
+.mm-start-btn:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(220,38,38,0.45)}
+.mm-start-btn:active{transform:translateY(0)}
+.mm-secondary-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(232,234,240,0.85);font-weight:700;font-size:.88rem;text-decoration:none;transition:all .2s}
+.mm-secondary-btn:hover{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:#fff}
+.mm-footer-note{margin-top:1.25rem;color:rgba(139,146,165,0.7);font-weight:700;font-size:.8rem;font-style:italic}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mm-start fade-in-v2">
+  <div class="mm-hero">
+    <div class="mm-hero-inner">
+
+      <div class="mm-badge">⚠️ Extreme Discipline Protocol</div>
+      <h1 class="mm-h1">🜁 Monk Mode</h1>
+      <p class="mm-tagline">90 days. No pause. No skip. No mercy.</p>
+
+      <div class="mm-warn">
+        <div class="mm-warn-icon">💀</div>
+        <div class="mm-warn-text">
+          <strong>WARNING:</strong> This is the hardest challenge on this platform. 
+          Miss even ONE day and your entire 90-day progress resets to Day 1. 
+          There are no second chances, no pauses, and no excuses. 
+          Only begin if you are fully committed to transforming your life.
+        </div>
+      </div>
+
+      <!-- RULES SECTION -->
+      <div class="mm-rules">
+        <div class="mm-rule">
+          <div class="mm-rule-num">01</div>
+          <div>
+            <div class="mm-rule-title">No Days Off</div>
+            <div class="mm-rule-desc">You must complete ALL 16 mandatory tasks every single day for 90 days straight. Miss one task = full reset to Day 1.</div>
+          </div>
+        </div>
+        <div class="mm-rule">
+          <div class="mm-rule-num">02</div>
+          <div>
+            <div class="mm-rule-title">24-Hour UTC Deadline</div>
+            <div class="mm-rule-desc">Each day has a strict server-enforced UTC deadline. If you miss the window, your run resets automatically. No frontend shortcuts.</div>
+          </div>
+        </div>
+        <div class="mm-rule">
+          <div class="mm-rule-num">03</div>
+          <div>
+            <div class="mm-rule-title">Sequential Only</div>
+            <div class="mm-rule-desc">Days must be completed in order. You cannot skip ahead or go back. Out-of-order attempts trigger an instant reset.</div>
+          </div>
+        </div>
+        <div class="mm-rule">
+          <div class="mm-rule-num">04</div>
+          <div>
+            <div class="mm-rule-title">No Pause / No Resume</div>
+            <div class="mm-rule-desc">Once you start, the clock runs every day. There is no pause button. Life happens — Monk Mode doesn't care.</div>
+          </div>
+        </div>
+        <div class="mm-rule">
+          <div class="mm-rule-num">05</div>
+          <div>
+            <div class="mm-rule-title">Server-Verified</div>
+            <div class="mm-rule-desc">All task completions are verified server-side. You cannot cheat by manipulating the frontend. The backend is the only source of truth.</div>
+          </div>
+        </div>
+        <div class="mm-rule">
+          <div class="mm-rule-num">06</div>
+          <div>
+            <div class="mm-rule-title">Badges Reset Too</div>
+            <div class="mm-rule-desc">If you fail, all Monk Mode badges are revoked. You earn them back only by completing the milestones again from scratch.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAILY TASKS PREVIEW -->
+      <div class="mm-tasks-preview">
+        <div class="mm-tasks-label">⛓️ 16 Mandatory Daily Contracts</div>
+        <div class="mm-tasks-grid">
+          <div class="mm-task-pill"><span class="dot"></span>Workout</div>
+          <div class="mm-task-pill"><span class="dot"></span>Cardio</div>
+          <div class="mm-task-pill"><span class="dot"></span>Water Intake</div>
+          <div class="mm-task-pill"><span class="dot"></span>Protein Goal</div>
+          <div class="mm-task-pill"><span class="dot"></span>Calorie Target</div>
+          <div class="mm-task-pill"><span class="dot"></span>Sleep Target</div>
+          <div class="mm-task-pill"><span class="dot"></span>Meditation</div>
+          <div class="mm-task-pill"><span class="dot"></span>Reading</div>
+          <div class="mm-task-pill"><span class="dot"></span>Mindset Training</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Junk Food</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Sugary Drinks</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Smoking</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Alcohol</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Pornography</div>
+          <div class="mm-task-pill"><span class="dot"></span>No Skipped Meals</div>
+          <div class="mm-task-pill"><span class="dot"></span>Social Media Limit</div>
+        </div>
+      </div>
+
+      <!-- LEVEL PROGRESSION -->
+      <div class="mm-levels">
+        <div class="mm-levels-label">🔥 7 Evolution Levels (Day 1 → 90)</div>
+        <div class="mm-level-bar">
+          <div class="mm-level-seg" style="background:rgba(220,38,38,0.25)">Weak Mind</div>
+          <div class="mm-level-seg" style="background:rgba(220,38,38,0.35)">Initiate</div>
+          <div class="mm-level-seg" style="background:rgba(180,60,20,0.4)">Warrior</div>
+          <div class="mm-level-seg" style="background:rgba(160,80,20,0.45)">Iron Mind</div>
+          <div class="mm-level-seg" style="background:rgba(108,99,255,0.35)">Relentless</div>
+          <div class="mm-level-seg" style="background:rgba(0,180,140,0.35)">Ascended</div>
+          <div class="mm-level-seg" style="background:linear-gradient(135deg,rgba(255,215,0,0.4),rgba(220,38,38,0.3))">Legend</div>
+        </div>
+      </div>
+
+      <div class="mm-actions">
+        <button id="monk-page-start-btn" class="mm-start-btn" type="button">
+          ☠️ Begin Transformation
+        </button>
+        <a class="mm-secondary-btn" href="{{ url_for('monk_mode.monk_days_page') }}">
+          📜 View 90-Day Grid
+        </a>
+      </div>
+
+      <div class="mm-footer-note">
+        "The pain of discipline is nothing compared to the pain of regret."
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/monk_mode.js') }}?v=3"></script>
+<script>
+(function(){
+  const btn=document.getElementById("monk-page-start-btn");
+  if(!btn)return;
+  btn.addEventListener("click",async()=>{
+    if(!confirm("⚠️ WARNING: Once you begin, there is NO pause. Miss even ONE day and you reset to Day 1. Are you absolutely sure?")){return}
+    try{
+      if(window.showToast)window.showToast("Initiating Monk Mode…","info");
+      const h={"Content-Type":"application/json"};
+      const csrf=document.querySelector('meta[name="csrf-token"]');
+      if(csrf)h["X-CSRFToken"]=csrf.getAttribute("content");
+      const res=await fetch('{{url_for("monk_mode.monk_start")}}',{method:"POST",headers:h,credentials:"same-origin",body:JSON.stringify({})});
+      const data=await res.json().catch(()=>({ok:false,error:"Bad response"}));
+      if(!res.ok||!data.ok){if(window.showToast&&data&&data.error)window.showToast(data.error,"error");return}
+      window.location.href='{{url_for("monk_mode.monk_day_detail",day_index=1)}}';
+    }catch(e){if(window.showToast)window.showToast("Failed to start Monk Mode.","error")}
+  });
+})();
+</script>
+{% endblock %}

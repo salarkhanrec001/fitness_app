@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if mode == 'signup' %}Create Account{% else %}Sign In{% endif %} — FitAI{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container" id="auth-container" data-mode="{{ mode }}">
@@ -46,6 +49,16 @@
           <span class="btn-icon">→</span>
         </button>
       </form>
+
+      <div class="auth-divider"><span>or</span></div>
+      <div id="g_id_onload"
+           data-client_id="{{ config.GOOGLE_CLIENT_ID }}"
+           data-login_uri="https://mdsalar.site/fitai/google-callback"
+           data-auto_prompt="false"
+           data-context="signin"
+           data-ux_mode="redirect">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="380"></div>
 
       <p class="auth-switch">
         Don't have an account?
@@ -132,6 +145,9 @@
           <span class="btn-icon">→</span>
         </button>
       </form>
+
+      <div class="auth-divider"><span>or</span></div>
+      <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="380"></div>
 
       <p class="auth-switch">
         Already have an account?

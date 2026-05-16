@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}My Habits — FitAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="habits-wrapper fade-in-v2">
+  
+  <div class="habits-header stagger-1">
+    <div class="habits-title-area">
+      <h1>🔁 My Habits</h1>
+      <p>Master your daily routines. Break the bad, build the good.</p>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <div class="search-container">
+        <form method="GET">
+          <input type="text" name="search" value="{{ search or '' }}" placeholder="Search habits..." class="search-input">
+        </form>
+      </div>
+      <a href="{{ url_for('habits.create') }}" class="btn-add-habit">
+        <span>+</span> New Habit
+      </a>
+    </div>
+  </div>
+
+  {% if habits %}
+  
+  <!-- ── 30-Day Challenges (Bad Habits) ── -->
+  {% set challenge_habits = habits|selectattr('is_bad_habit')|list %}
+  {% if challenge_habits %}
+  <div class="challenge-section stagger-2">
+    <h2 class="section-title">
+      🚫 30-Day Challenges
+      <span class="badge-danger-glow">Break Bad Habits</span>
+    </h2>
+    <div class="challenge-grid">
+      {% for habit in challenge_habits %}
+      <div class="premium-challenge-card">
+        
+        <div class="challenge-header">
+          <div class="challenge-info">
+            <h3><span>{{ habit.icon }}</span> {{ habit.name }}</h3>
+            <p>{{ habit.challenge_days }}-day challenge · Day {{ habit.current_streak }} of {{ habit.challenge_days }}</p>
+          </div>
+          <form method="POST" action="{{ url_for('habits.delete', habit_id=habit.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-delete-habit" onclick="return confirm('Delete this challenge?')" aria-label="Delete">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </form>
+        </div>
+
+        <div class="challenge-progress-wrapper">
+          <div class="progress-header">
+            <span>Overall Progress</span>
+            <span class="pct">{{ habit.challenge_progress }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: {{ habit.challenge_progress }}%;"></div>
+          </div>
+        </div>
+
+        <div class="day-grid">
+          {% for day in range(1, habit.challenge_days + 1) %}
+          <div class="day-cell {% if day <= habit.current_streak %}done{% elif day == habit.current_streak + 1 %}current{% else %}pending{% endif %}">
+            {% if day <= habit.current_streak %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            {% else %}
+              {{ day }}
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if not habit.challenge_completed %}
+        <form method="POST" action="{{ url_for('habits.toggle', habit_id=habit.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-mega {% if habit.completed_today %}checked-in{% else %}clean{% endif %}">
+            {% if habit.completed_today %}
+              ✅ Checked in — {{ habit.challenge_days_remaining }} days left
+            {% else %}
+              🛡️ Mark today as clean (Day {{ habit.current_streak + 1 }})
+            {% endif %}
+          </button>
+        </form>
+        {% else %}
+        <button class="btn-mega checked-in" disabled style="opacity: 0.8; cursor: default;">
+          🏆 CHALLENGE COMPLETED 🏆
+        </button>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Good Habits ── -->
+  {% set good_habits = habits|selectattr('is_bad_habit', 'false')|list %}
+  {% if good_habits %}
+  <div class="stagger-3">
+    <h2 class="section-title">✅ Daily Habits</h2>
+    <div class="habits-grid">
+      {% for habit in good_habits %}
+      <div class="premium-habit-card" style="--habit-color: {{ habit.color }};">
+        
+        <div class="habit-main-row">
+          <!-- Animated Checkbox -->
+          <form method="POST" action="{{ url_for('habits.toggle', habit_id=habit.id) }}" class="inline-form" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="habit-check-btn {% if habit.completed_today %}checked{% endif %}" aria-label="Toggle habit">
+              <svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+          </form>
+          
+          <div class="habit-details {% if habit.completed_today %}completed{% endif %}">
+            <h3>{{ habit.icon }} {{ habit.name }}</h3>
+            {% if habit.description %}<p>{{ habit.description }}</p>{% endif %}
+          </div>
+
+          <form method="POST" action="{{ url_for('habits.delete', habit_id=habit.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-delete-habit" onclick="return confirm('Delete this habit?')" aria-label="Delete">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </form>
+        </div>
+
+        <div class="habit-stats-row">
+          <div class="stat-item {% if habit.current_streak > 0 %}active-streak{% endif %}">
+            🔥 {{ habit.current_streak }} Day{{ 's' if habit.current_streak != 1 }} Streak
+          </div>
+          <div class="stat-item">
+            🏅 Best: {{ habit.best_streak }}
+          </div>
+          <div class="stat-item">
+            ✅ Total: {{ habit.total_completions }}
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state stagger-2">
+    <div class="empty-icon" style="font-size: 5rem; margin-bottom: 1.5rem; text-shadow: 0 10px 30px rgba(167,139,250,0.4);">🔁</div>
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #fff;">No Habits Yet</h3>
+    <p style="font-size: 1.1rem; max-width: 400px; margin: 0 auto 2rem;">It's time to build better routines. Start tracking your good and bad habits today.</p>
+    <a href="{{ url_for('habits.create') }}" class="btn-add-habit" style="display: inline-flex;">
+      + Create Your First Habit
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

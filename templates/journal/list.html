@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}My Journal — FitAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/journal.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="journal-wrapper fade-in-v2">
+  
+  <div class="page-header stagger-1">
+    <div class="title-area">
+      <h1>📓 My Journal</h1>
+      <p>Log your thoughts. Reflect on your daily progress.</p>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <a href="{{ url_for('journal.create') }}" class="btn-add-habit" style="background: linear-gradient(135deg, #f472b6, #fb923c); box-shadow: 0 10px 20px rgba(244, 114, 182, 0.3);">
+        <span>✍️</span> New Entry
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Mood Stats (AAA Filter) ── -->
+  {% if mood_stats %}
+  <div class="mood-stats-row stagger-2">
+    {% set mood_map = {'great': '🤩', 'good': '😊', 'neutral': '😐', 'bad': '😔', 'terrible': '😢'} %}
+    {% for mood, count in mood_stats.items() %}
+    <a href="{{ url_for('journal.list_entries', mood=mood) }}" class="premium-mood-stat {% if current_mood == mood %}active{% endif %}">
+      <span class="mood-icon">{{ mood_map.get(mood, '😐') }}</span>
+      <div class="mood-info">
+        <span class="mood-count">{{ count }}</span>
+        <span class="mood-label">{{ mood }}</span>
+      </div>
+    </a>
+    {% endfor %}
+    
+    {% if current_mood %}
+    <a href="{{ url_for('journal.list_entries') }}" class="btn-secondary" style="border-radius: 99px; padding: 0.6rem 1.25rem; font-size: 0.85rem; margin-left: auto;">Clear Filter</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ── Search ── -->
+  <div class="search-container stagger-2">
+    <form method="GET">
+      <input type="text" name="search" value="{{ search or '' }}" placeholder="Search past entries..." class="search-input" style="border-color: rgba(244, 114, 182, 0.2);">
+    </form>
+  </div>
+
+  <!-- ── Journal Entries ── -->
+  {% if pagination.items %}
+  <div class="journal-entries stagger-3">
+    {% for entry in pagination.items %}
+    <a href="{{ url_for('journal.view', entry_id=entry.id) }}" class="premium-journal-card">
+      
+      <div class="card-header-row">
+        <div>
+          <h3 class="entry-title">
+            <span>{{ entry.mood_icon }}</span>
+            {{ entry.title or 'Untitled Entry' }}
+          </h3>
+          <p class="entry-date">{{ entry.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        </div>
+      </div>
+      
+      <p class="entry-preview">{{ entry.content[:250] }}{% if entry.content|length > 250 %}...{% endif %}</p>
+      
+      {% if entry.tag_list %}
+      <div class="premium-tag-row">
+        {% for tag in entry.tag_list %}
+        <span class="premium-tag">#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- ── Pagination ── -->
+  {% if pagination.pages > 1 %}
+  <div class="premium-pagination stagger-3">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('journal.list_entries', page=pagination.prev_num, mood=current_mood, search=search) }}" class="btn-secondary" style="border-radius: 8px;">← Prev</a>
+    {% endif %}
+    
+    <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    
+    {% if pagination.has_next %}
+    <a href="{{ url_for('journal.list_entries', page=pagination.next_num, mood=current_mood, search=search) }}" class="btn-secondary" style="border-radius: 8px;">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state stagger-3" style="padding: 4rem 2rem; text-align: center;">
+    <div class="empty-icon" style="font-size: 5rem; margin-bottom: 1.5rem; text-shadow: 0 10px 30px rgba(244, 114, 182, 0.4);">📓</div>
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #fff;">Blank Pages</h3>
+    <p style="font-size: 1.1rem; max-width: 400px; margin: 0 auto 2rem; color: var(--clr-text-muted);">You haven't written any journal entries yet. Document your journey today.</p>
+    <a href="{{ url_for('journal.create') }}" class="btn-add-habit" style="display: inline-flex; background: linear-gradient(135deg, #f472b6, #fb923c); box-shadow: 0 10px 20px rgba(244, 114, 182, 0.3);">
+      ✍️ Write First Entry
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

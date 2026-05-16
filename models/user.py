@@ -39,6 +39,14 @@ class User(db.Model, UserMixin):
     received_requests = db.relationship("FriendRequest", foreign_keys="FriendRequest.receiver_id", backref="receiver", lazy=True)
     password_resets = db.relationship("PasswordReset", backref="user", lazy=True, cascade="all, delete-orphan")
 
+    # ── Motivaura feature relationships ──
+    habits = db.relationship("Habit", backref="owner", lazy="dynamic", cascade="all, delete-orphan",
+                             foreign_keys="Habit.user_id")
+    timetables = db.relationship("Timetable", backref="owner", lazy="dynamic", cascade="all, delete-orphan")
+    journal_entries = db.relationship("JournalEntry", backref="owner", lazy="dynamic", cascade="all, delete-orphan")
+    achievements = db.relationship("Achievement", backref="owner", lazy="dynamic", cascade="all, delete-orphan")
+    notifications = db.relationship("Notification", backref="owner", lazy="dynamic", cascade="all, delete-orphan")
+
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 

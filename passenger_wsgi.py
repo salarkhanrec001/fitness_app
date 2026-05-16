@@ -15,7 +15,18 @@ if project_dir not in sys.path:
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
-load_dotenv(os.path.join(project_dir, ".env"))
+
+env_path = os.path.join(project_dir, ".env")
+loaded = load_dotenv(env_path, override=False)
+
+openai_set = bool(os.environ.get("OPENAI_API_KEY"))
+gemini_set = bool(os.environ.get("GEMINI_API_KEY"))
+ai_set = bool(os.environ.get("AI_API_KEY"))
+
+print(
+    f"[FitAI] .env_loaded={loaded} OPENAI_API_KEY_set={openai_set} GEMINI_API_KEY_set={gemini_set} AI_API_KEY_set={ai_set}",
+    file=sys.stderr,
+)
 
 # Import the Flask application
 from app import app as application  # noqa: F401

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}My Timetables — FitAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/timetable.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="timetable-wrapper fade-in-v2">
+  
+  <div class="page-header stagger-1">
+    <div class="title-area">
+      <h1>📅 My Timetables</h1>
+      <p>Structure your days. Maximize your output.</p>
+    </div>
+    <a href="{{ url_for('timetable.create') }}" class="btn-add-habit">
+      <span>+</span> New Timetable
+    </a>
+  </div>
+
+  <!-- ── Today's Schedule (Timeline UX) ── -->
+  {% if today_slots %}
+  <div class="stagger-2" style="margin-bottom: 4rem;">
+    <h2 class="section-title">⏰ Today's Timeline</h2>
+    <div class="today-timeline">
+      {% for slot in today_slots %}
+      <div class="premium-timeline-item {% if slot.is_completed %}completed{% endif %}">
+        
+        <!-- Time Column -->
+        <div class="timeline-time">
+          <span class="time-start">{{ slot.start_time_12 }}</span>
+          <span class="time-divider">to</span>
+          <span class="time-end">{{ slot.end_time_12 }}</span>
+        </div>
+
+        <!-- Animated Checkbox -->
+        <form method="POST" action="{{ url_for('timetable.toggle_slot', slot_id=slot.id) }}" style="margin: 0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="tt-check-btn {% if slot.is_completed %}checked{% endif %}" aria-label="Toggle slot">
+            <svg viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Content -->
+        <div class="timeline-content">
+          <h4>{{ slot.task }}</h4>
+          <span class="category-badge cat-{{ slot.category }}">{{ slot.category }}</span>
+          {% if slot.duration_formatted %}<span class="duration-badge">{{ slot.duration_formatted }}</span>{% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Saved Timetables Grid ── -->
+  <div class="stagger-3">
+    <h2 class="section-title">📁 Your Routines</h2>
+    {% if timetables %}
+    <div class="timetable-grid">
+      {% for tt in timetables %}
+      <div class="premium-tt-card" style="--tt-color: {{ tt.color }};">
+        <h3 class="tt-title">{{ tt.title }}</h3>
+        {% if tt.description %}<p class="tt-desc">{{ tt.description }}</p>{% endif %}
+        
+        <div class="tt-actions">
+          <a href="{{ url_for('timetable.view', tt_id=tt.id) }}" class="btn-view">
+            View Schedule
+          </a>
+          <form method="POST" action="{{ url_for('timetable.delete', tt_id=tt.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-del-icon" onclick="return confirm('Delete this timetable routine?')" aria-label="Delete">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+      <div class="empty-icon" style="font-size: 5rem; margin-bottom: 1.5rem; text-shadow: 0 10px 30px rgba(96,165,250,0.4);">📅</div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: #fff;">No Routines Found</h3>
+      <p style="font-size: 1.1rem; max-width: 400px; margin: 0 auto 2rem; color: var(--clr-text-muted);">Organize your study, workout, or work blocks into a weekly routine.</p>
+      <a href="{{ url_for('timetable.create') }}" class="btn-add-habit" style="display: inline-flex;">
+        + Create Timetable
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

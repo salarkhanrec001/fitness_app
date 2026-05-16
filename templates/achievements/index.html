@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Achievements — FitAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/achievements.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="achievements-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🏆 Achievements</h1>
+      <p class="page-subtitle">{{ earned_count }} of {{ badges|length }} badges earned</p>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="achievement-progress">
+    <div class="progress-bar progress-bar-lg">
+      <div class="progress-fill progress-gold" style="width: {{ (earned_count / badges|length * 100) if badges else 0 }}%"></div>
+    </div>
+    <p class="progress-text">{{ ((earned_count / badges|length * 100)|round(0)|int) if badges else 0 }}% Complete</p>
+  </div>
+
+  <div class="badges-grid">
+    {% for badge in badges %}
+    <div class="card badge-card {% if badge.earned %}badge-earned{% else %}badge-locked{% endif %}">
+      <div class="badge-icon-wrapper">
+        <span class="badge-icon">{{ badge.icon }}</span>
+      </div>
+      <h3 class="badge-title">{{ badge.title }}</h3>
+      <p class="badge-desc">{{ badge.desc }}</p>
+      {% if badge.earned %}
+      <span class="badge-status earned">✓ Earned</span>
+      {% else %}
+      <span class="badge-status locked">🔒 Locked</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

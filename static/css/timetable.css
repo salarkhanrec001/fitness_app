@@ -1,0 +1,435 @@
+/* ============================================================
+   timetable.css — AAA Premium UX/UI for Timetable Schedule
+   ============================================================ */
+
+/* ── Global Animations ── */
+.stagger-1 { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both; }
+.stagger-2 { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both; }
+.stagger-3 { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both; }
+
+.timetable-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.title-area h1 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-area p {
+  color: var(--clr-text-muted);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Today's Timeline (AAA) ── */
+.today-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  margin-bottom: 3.5rem;
+}
+
+/* The vertical connecting line */
+.today-timeline::before {
+  content: "";
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 110px;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(96, 165, 250, 0.5), rgba(167, 139, 250, 0.1));
+  z-index: 0;
+}
+
+.premium-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(20, 23, 31, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  position: relative;
+  z-index: 1;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.premium-timeline-item:hover {
+  transform: translateX(5px);
+  background: rgba(30, 34, 45, 0.8);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.premium-timeline-item.completed {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.premium-timeline-item.completed:hover {
+  opacity: 0.9;
+  filter: grayscale(0);
+}
+
+.timeline-time {
+  min-width: 85px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.time-start {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #60a5fa;
+}
+
+.time-end {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+}
+
+.timeline-content {
+  flex: 1;
+  padding-left: 1.5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-content h4 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+
+/* Category Badges (Glowing) */
+.category-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.8rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 10px currentColor;
+  opacity: 0.9;
+}
+
+.cat-general  { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); }
+.cat-study    { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.cat-workout  { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+.cat-work     { background: rgba(168,85,247,0.15); color: #a78bfa; border: 1px solid rgba(168,85,247,0.3); }
+.cat-personal { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.cat-creative { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.3); }
+.cat-social   { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+.cat-rest     { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+
+.duration-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.05);
+  color: var(--clr-text-muted);
+  margin-left: 0.5rem;
+}
+
+/* Custom SVG Checkbox UX (Shared from Habits but adapted) */
+.tt-check-btn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tt-check-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: white;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  transition: stroke-dashoffset 0.4s ease-out;
+}
+
+.tt-check-btn:hover {
+  border-color: #60a5fa;
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.05);
+}
+
+.tt-check-btn.checked {
+  background: #22c55e;
+  border-color: #22c55e;
+  box-shadow: 0 5px 15px rgba(34,197,94,0.3);
+}
+
+.tt-check-btn.checked svg {
+  stroke-dashoffset: 0;
+}
+
+/* ── Timetable Grid Cards (AAA) ── */
+.timetable-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.premium-tt-card {
+  background: rgba(20, 23, 31, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-tt-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: var(--tt-color, #60a5fa);
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.premium-tt-card:hover {
+  transform: translateY(-5px);
+  background: rgba(30, 34, 45, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.premium-tt-card:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 15px var(--tt-color, #60a5fa);
+}
+
+.tt-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+
+.tt-desc {
+  font-size: 0.9rem;
+  color: var(--clr-text-muted);
+  flex: 1;
+  margin: 0 0 1.5rem;
+}
+
+.tt-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.btn-view {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-view:hover {
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.btn-del-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-del-icon:hover {
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+/* ── Week View (7 Columns) ── */
+.week-view {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.premium-day-column {
+  background: rgba(20, 23, 31, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.day-heading {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--clr-text);
+  margin: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.premium-slot-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.premium-slot-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; width: 4px;
+  background: var(--tt-color, #60a5fa);
+  opacity: 0.7;
+}
+
+.premium-slot-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.premium-slot-card.done {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+.slot-time {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--tt-color, #60a5fa);
+  margin-bottom: 0.25rem;
+}
+
+.slot-task {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.slot-notes {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  margin: 0.4rem 0;
+  line-height: 1.4;
+}
+
+.slot-actions-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.no-slots {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--clr-text-dim);
+  padding: 2rem 0;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .week-view {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .today-timeline::before { left: 42px; }
+  .timeline-time { min-width: auto; position: absolute; top: -10px; left: 1.5rem; background: #14171f; padding: 0 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); flex-direction: row; gap: 0.3rem;}
+  .premium-timeline-item { flex-direction: column; align-items: flex-start; padding-top: 1.5rem; }
+  .timeline-content { padding-left: 0; border-left: none; }
+  .week-view { grid-template-columns: repeat(1, 1fr); }
+  .premium-day-column { min-width: 100%; }
+}

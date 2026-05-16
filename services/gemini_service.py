@@ -7,10 +7,153 @@ Falls back to static data if no API key is configured.
 import json
 import os
 import re
+from dataclasses import dataclass
+from typing import Any
+from urllib import error, request
+
+OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_TIMEOUT_SECONDS = int(os.environ.get("OPENAI_TIMEOUT_SECONDS", "60"))
+
+
+@dataclass
+class _AIResponse:
+    text: str
+
+
+def _get_openai_api_key() -> str:
+    """Return an OpenAI API key from supported environment variable names."""
+    return (
+        os.environ.get("OPENAI_API_KEY", "").strip()
+        or os.environ.get("AI_API_KEY", "").strip()
+    )
+
+
+def has_ai_api_key() -> bool:
+    """Return True when either OpenAI or Gemini credentials are configured."""
+    return bool(_get_openai_api_key() or os.environ.get("GEMINI_API_KEY", "").strip())
+
+
+def get_ai_connection_status() -> dict[str, bool]:
+    """
+    Non-sensitive debug info for UI:
+    - which API keys are present in the running Passenger/WSGI process
+    """
+    return {
+        "openai": bool(_get_openai_api_key()),
+        "gemini": bool(os.environ.get("GEMINI_API_KEY", "").strip()),
+        "ai_fallback": bool(os.environ.get("AI_API_KEY", "").strip()),
+    }
+
+
+def _should_request_json(prompt: str) -> bool:
+    prompt_lower = prompt.lower()
+    return "valid json" in prompt_lower or "respond only with valid json" in prompt_lower
+
+
+def _normalize_message(item: dict[str, Any]) -> dict[str, str]:
+    role = item.get("role", "user")
+    if role == "model":
+        role = "assistant"
+
+    content = item.get("content")
+    if content is None:
+        parts = item.get("parts", [])
+        if isinstance(parts, list):
+            content = "\n".join(str(part) for part in parts)
+        else:
+            content = str(parts)
+
+    if isinstance(content, list):
+        content = "\n".join(str(part) for part in content)
+
+    return {"role": role, "content": str(content)}
+
+
+def _openai_chat_completion(
+    messages: list[dict[str, str]],
+    *,
+    json_mode: bool = False,
+    temperature: float = 0.7,
+) -> str:
+    api_key = _get_openai_api_key()
+    if not api_key:
+        raise RuntimeError("No OpenAI API key configured")
+
+    payload: dict[str, Any] = {
+        "model": OPENAI_MODEL,
+        "messages": messages,
+        "temperature": temperature,
+    }
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+
+    req = request.Request(
+        OPENAI_API_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(req, timeout=OPENAI_TIMEOUT_SECONDS) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "ignore")
+        raise RuntimeError(
+            f"OpenAI request failed ({exc.code}): {body or exc.reason}"
+        ) from exc
+    except error.URLError as exc:
+        raise RuntimeError(f"OpenAI request failed: {exc.reason}") from exc
+
+    choices = data.get("choices") or []
+    if not choices:
+        return ""
+
+    message = choices[0].get("message") or {}
+    text = message.get("content") or ""
+    if isinstance(text, list):
+        text = "".join(
+            part.get("text", "") if isinstance(part, dict) else str(part)
+            for part in text
+        )
+    return str(text).strip()
+
+
+class _OpenAIChatSession:
+    def __init__(self, history: list[dict[str, Any]] | None):
+        self._history = [_normalize_message(item) for item in (history or [])]
+
+    def send_message(self, user_message: str) -> _AIResponse:
+        text = _openai_chat_completion(
+            self._history + [{"role": "user", "content": user_message}],
+            temperature=0.7,
+        )
+        return _AIResponse(text=text)
+
+
+class _OpenAIModel:
+    def generate_content(self, prompt: str) -> _AIResponse:
+        json_mode = _should_request_json(prompt)
+        text = _openai_chat_completion(
+            [{"role": "user", "content": prompt}],
+            json_mode=json_mode,
+            temperature=0.2 if json_mode else 0.7,
+        )
+        return _AIResponse(text=text)
+
+    def start_chat(self, history: list[dict[str, Any]] | None):
+        return _OpenAIChatSession(history)
 
 
 def _get_client():
-    """Return a configured Gemini GenerativeModel, or None if no key."""
+    """Return a configured AI client, preferring OpenAI when available."""
+    if _get_openai_api_key():
+        return _OpenAIModel()
+
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         return None
@@ -23,7 +166,10 @@ def _get_client():
 
 
 def _get_chat_client():
-    """Return a lighter Gemini model for chat — tries flash models in order."""
+    """Return a chat-capable AI client, preferring OpenAI when available."""
+    if _get_openai_api_key():
+        return _OpenAIModel()
+
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         return None
@@ -284,8 +430,13 @@ def chat_with_coach(user, profile, user_message: str, history: list) -> str:
     except Exception as e:
         err = str(e)
         if "429" in err or "quota" in err.lower():
+            if _get_openai_api_key():
+                return (
+                    "⏳ OpenAI is temporarily rate-limited / quota exceeded. "
+                    "Please wait a minute and try again — or check your OpenAI quota."
+                )
             return (
-                "⏳ The AI is temporarily rate-limited (free tier quota). "
+                "⏳ Gemini is temporarily rate-limited / quota exceeded. "
                 "Please wait a minute and try again — or check your Gemini API quota at "
                 "https://aistudio.google.com/"
             )
@@ -439,5 +590,3 @@ def get_proactive_insight(user, profile):
     # Fallback to stay_fit if goal not found
     options = insights.get(goal, insights["stay_fit"])
     return random.choice(options)
-
-

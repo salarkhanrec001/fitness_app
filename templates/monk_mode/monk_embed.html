@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monk Mode Embed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/monk_mode.css') }}?v=1" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        /* Hide scrollbar for cinematic look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .monk-mode-section {
+            margin-top: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body>
+{% include "monk_mode/_monk_fragment.html" %}
+</body>
+</html>
+</body>
+</html>
+

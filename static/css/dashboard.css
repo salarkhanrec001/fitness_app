@@ -905,8 +905,12 @@
     box-shadow 0.4s ease,
     border-color 0.4s ease;
   overflow: hidden;
-  cursor: pointer;
+  cursor: default;
   perspective: 1000px;
+}
+
+.premium-card:is(a, button, [onclick], [role="button"]) {
+  cursor: pointer;
 }
 
 .premium-card::before {

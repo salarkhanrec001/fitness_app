@@ -1,0 +1,17 @@
+/* ACHIEVEMENTS PAGE STYLES */
+.achievements-page { max-width: 900px; margin: 0 auto; }
+.achievement-progress { margin-bottom: 2rem; text-align: center; }
+.progress-text { font-size: 0.85rem; color: var(--text-muted, #94a3b8); margin-top: 0.5rem; }
+.badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.badge-card { padding: 1.5rem; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+.badge-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.badge-earned { border-color: rgba(34,197,94,0.3); }
+.badge-locked { opacity: 0.5; filter: grayscale(0.5); }
+.badge-icon-wrapper { margin-bottom: 0.75rem; }
+.badge-icon { font-size: 2.5rem; }
+.badge-title { font-size: 1rem; font-weight: 700; margin: 0 0 0.3rem; }
+.badge-desc { font-size: 0.78rem; color: var(--text-muted, #94a3b8); margin: 0 0 0.75rem; }
+.badge-status { font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 6px; }
+.badge-status.earned { background: rgba(34,197,94,0.1); color: #22c55e; }
+.badge-status.locked { background: rgba(255,255,255,0.05); color: #6b7280; }
+@media (max-width: 550px) { .badges-grid { grid-template-columns: repeat(2, 1fr); } }

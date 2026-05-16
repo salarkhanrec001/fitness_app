@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Add Habit — FitAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="habits-wrapper fade-in-v2">
+  
+  <div class="premium-form-card stagger-1">
+    <div class="form-header">
+      <a href="{{ url_for('habits.list_habits') }}" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Habits
+      </a>
+      <h1>✨ Create New Habit</h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('habits.create') }}" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label class="form-label">Habit Name *</label>
+        {{ form.name(class="form-input", placeholder="e.g., Read for 30 minutes or Drink 2L water") }}
+        {% for error in form.name.errors %}<p class="form-error" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.2rem;">{{ error }}</p>{% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description (Optional)</label>
+        {{ form.description(class="form-input form-textarea", placeholder="What's your motivation behind this habit?") }}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Frequency Target</label>
+          {{ form.frequency(class="form-input") }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emoji / Icon</label>
+          {{ form.icon(class="form-input", placeholder="💧") }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Habit Color Theme</label>
+        <div class="color-picker-wrapper">
+          {{ form.color(class="color-picker-input", type="color") }}
+          <span class="color-hint">This will be the glowing LED color of your habit card.</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="premium-checkbox-label">
+          {{ form.is_bad_habit(class="premium-checkbox-input") }}
+          <span class="premium-checkbox-text">🚨 Make this a "Break a Bad Habit" 30-Day Challenge</span>
+        </label>
+      </div>
+
+      <div class="form-actions-row">
+        <a href="{{ url_for('habits.list_habits') }}" class="btn-secondary" style="padding: 0.8rem 1.5rem; font-size: 1rem; border-radius: 12px;">Cancel</a>
+        <button type="submit" class="btn-add-habit" style="border-radius: 12px; font-size: 1rem; padding: 0.8rem 2rem;">Save Habit</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

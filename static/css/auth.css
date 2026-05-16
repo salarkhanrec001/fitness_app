@@ -304,6 +304,18 @@
 }
 .auth-toggle-btn:hover { color: var(--clr-secondary); text-decoration: underline; }
 
+/* ── OAuth Divider ── */
+.auth-divider {
+  display: flex; align-items: center; gap: 1rem;
+  margin: 1rem 0 0.75rem;
+  color: var(--clr-text-muted); font-size: 0.8rem; font-weight: 500;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--clr-border);
+}
+.g_id_signin { display: flex; justify-content: center; }
+
 /* ── Password Strength ── */
 .password-strength { margin: -0.1rem 0 0; }
 .strength-bar {

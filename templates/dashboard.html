@@ -1,20 +1,63 @@
 {% extends "base.html" %} {% block title %}Dashboard — FitAI{% endblock %} {%
-block extra_css %}<link
+block extra_css %}
+<link
   rel="stylesheet"
   href="{{ url_for('static', filename='css/dashboard.css') }}"
-/>{% endblock %} {% block content %}
+/>
+{% endblock %} {% block content %}
 <div class="dashboard-wrapper fade-in-v2">
   <!-- ── AI Coach Insight (AAA Level) ── -->
-  <a href="{{ url_for('ai.coach') }}" class="dash-section coach-insight-section premium-card" style="display: block; text-decoration: none; padding: 1.5rem 2rem; border-left: 4px solid var(--clr-primary); background: linear-gradient(90deg, rgba(108, 99, 255, 0.05), transparent);">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <div style="font-size: 2rem;">💡</div>
+  <a
+    href="{{ url_for('ai.coach') }}"
+    class="dash-section coach-insight-section premium-card"
+    style="
+      display: block;
+      text-decoration: none;
+      padding: 1.5rem 2rem;
+      border-left: 4px solid var(--clr-primary);
+      background: linear-gradient(90deg, rgba(108, 99, 255, 0.05), transparent);
+    "
+  >
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      "
+    >
+      <div style="display: flex; align-items: center; gap: 1rem">
+        <div style="font-size: 2rem">💡</div>
         <div>
-          <span style="display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--clr-primary); margin-bottom: 0.25rem;">FitAI Coach Insight</span>
-          <p style="margin: 0; font-size: 1rem; color: var(--clr-text); font-weight: 500;">{{ coach_insight }}</p>
+          <span
+            style="
+              display: block;
+              font-size: 0.75rem;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              color: var(--clr-primary);
+              margin-bottom: 0.25rem;
+            "
+            >FitAI Coach Insight</span
+          >
+          <p
+            style="
+              margin: 0;
+              font-size: 1rem;
+              color: var(--clr-text);
+              font-weight: 500;
+            "
+          >
+            {{ coach_insight }}
+          </p>
         </div>
       </div>
-      <div style="color: var(--clr-primary); font-weight: 800; font-size: 0.9rem;">Chat Now →</div>
+      <div
+        style="color: var(--clr-primary); font-weight: 800; font-size: 0.9rem"
+      >
+        Chat Now →
+      </div>
     </div>
   </a>
 
@@ -112,42 +155,190 @@ block extra_css %}<link
     <div class="section-header">
       <h2 class="section-title">🏅 Your Achievements</h2>
     </div>
-    <div style="display: flex; gap: 1.5rem; overflow-x: auto; padding: 0.5rem 0 1rem; scrollbar-width: none;">
+    <div
+      style="
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        padding: 0.5rem 0 1rem;
+        scrollbar-width: none;
+      "
+    >
       <!-- Onboarding Badge (Always Unlocked for dash) -->
-      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px;">
-        <div class="premium-card" style="width: 80px; height: 80px; background: linear-gradient(135deg, rgba(0, 212, 170, 0.2), rgba(0, 212, 170, 0.05)); border: 1px solid var(--clr-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; box-shadow: 0 0 15px rgba(0, 212, 170, 0.2);">
-          <span style="font-size: 2rem;">🌱</span>
+      <div
+        class="badge-item"
+        style="flex: 0 0 auto; text-align: center; width: 100px"
+      >
+        <div
+          class="premium-card"
+          style="
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(
+              135deg,
+              rgba(0, 212, 170, 0.2),
+              rgba(0, 212, 170, 0.05)
+            );
+            border: 1px solid var(--clr-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            box-shadow: 0 0 15px rgba(0, 212, 170, 0.2);
+          "
+        >
+          <span style="font-size: 2rem">🌱</span>
         </div>
-        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">First Step</span>
-        <span style="font-size: 0.6rem; color: var(--clr-success); font-weight: 800; text-transform: uppercase;">Unlocked</span>
+        <span
+          style="
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--clr-text);
+          "
+          >First Step</span
+        >
+        <span
+          style="
+            font-size: 0.6rem;
+            color: var(--clr-success);
+            font-weight: 800;
+            text-transform: uppercase;
+          "
+          >Unlocked</span
+        >
       </div>
 
       <!-- Challenge Badge (Locked/Unlocked) -->
       {% set streak_val = streak.display_streak if streak else 0 %}
-      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if completion_pct and completion_pct >= 25 %}1{% else %}0.4{% endif %};">
-        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
-          <span style="font-size: 2rem; filter: {% if not completion_pct or completion_pct < 25 %}grayscale(1){% endif %};">🛡️</span>
+      <div
+        class="badge-item"
+        style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if completion_pct and completion_pct >= 25 %}1{% else %}0.4{% endif %};"
+      >
+        <div
+          class="premium-card"
+          style="
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+          "
+        >
+          <span
+            style="font-size: 2rem; filter: {% if not completion_pct or completion_pct < 25 %}grayscale(1){% endif %};"
+            >🛡️</span
+          >
         </div>
-        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">Iron Core</span>
-        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">{% if completion_pct and completion_pct >= 25 %}Unlocked{% else %}Locked{% endif %}</span>
+        <span
+          style="
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--clr-text);
+          "
+          >Iron Core</span
+        >
+        <span
+          style="
+            font-size: 0.6rem;
+            color: var(--clr-text-muted);
+            font-weight: 800;
+            text-transform: uppercase;
+          "
+          >{% if completion_pct and completion_pct >= 25 %}Unlocked{% else
+          %}Locked{% endif %}</span
+        >
       </div>
 
       <!-- Streak Badge (Locked/Unlocked) -->
-      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if streak_val >= 7 %}1{% else %}0.4{% endif %};">
-        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
-          <span style="font-size: 2rem; filter: {% if streak_val < 7 %}grayscale(1){% endif %};">🔥</span>
+      <div
+        class="badge-item"
+        style="flex: 0 0 auto; text-align: center; width: 100px; opacity: {% if streak_val >= 7 %}1{% else %}0.4{% endif %};"
+      >
+        <div
+          class="premium-card"
+          style="
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+          "
+        >
+          <span
+            style="font-size: 2rem; filter: {% if streak_val < 7 %}grayscale(1){% endif %};"
+            >🔥</span
+          >
         </div>
-        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">7-Day Blaze</span>
-        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">{% if streak_val >= 7 %}Unlocked{% else %}Locked{% endif %}</span>
+        <span
+          style="
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--clr-text);
+          "
+          >7-Day Blaze</span
+        >
+        <span
+          style="
+            font-size: 0.6rem;
+            color: var(--clr-text-muted);
+            font-weight: 800;
+            text-transform: uppercase;
+          "
+          >{% if streak_val >= 7 %}Unlocked{% else %}Locked{% endif %}</span
+        >
       </div>
 
       <!-- Morning Hero Badge (Always Locked for now) -->
-      <div class="badge-item" style="flex: 0 0 auto; text-align: center; width: 100px; opacity: 0.4;">
-        <div class="premium-card" style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
-          <span style="font-size: 2rem; filter: grayscale(1);">🌅</span>
+      <div
+        class="badge-item"
+        style="flex: 0 0 auto; text-align: center; width: 100px; opacity: 0.4"
+      >
+        <div
+          class="premium-card"
+          style="
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+          "
+        >
+          <span style="font-size: 2rem; filter: grayscale(1)">🌅</span>
         </div>
-        <span style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--clr-text);">Morning Hero</span>
-        <span style="font-size: 0.6rem; color: var(--clr-text-muted); font-weight: 800; text-transform: uppercase;">Locked</span>
+        <span
+          style="
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--clr-text);
+          "
+          >Morning Hero</span
+        >
+        <span
+          style="
+            font-size: 0.6rem;
+            color: var(--clr-text-muted);
+            font-weight: 800;
+            text-transform: uppercase;
+          "
+          >Locked</span
+        >
       </div>
     </div>
   </section>
@@ -278,9 +469,11 @@ block extra_css %}<link
           >{{ goal.current_value }} / {{ goal.target_value }} {{ goal.unit
           }}</small
         >
-        {% endif %}
-        {% if goal.deadline %}
-        <div class="goal-mini-deadline" data-deadline="{{ goal.deadline.isoformat() }}">
+        {% endif %} {% if goal.deadline %}
+        <div
+          class="goal-mini-deadline"
+          data-deadline="{{ goal.deadline.isoformat() }}"
+        >
           ⏳ <span class="countdown-timer">Calculating...</span>
         </div>
         {% endif %}
@@ -311,15 +504,81 @@ block extra_css %}<link
       <div class="challenge-content">
         <div class="challenge-badge fade-in-v2">Limited Time</div>
         <h3 class="challenge-name">30-Day Six Pack Challenge</h3>
-        <p class="challenge-text">Get shredded with our elite core-focused training programme. Expert-curated 30-day progression.</p>
-        <div class="challenge-actions" style="display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem;">
-          <a href="{{ url_for('onboarding.start_challenge', challenge_type='six_pack') }}" class="btn-primary">Start Challenge <span>→</span></a>
-          <a href="{{ url_for('ai.challenge_six_pack') }}" class="btn-link" style="color: var(--clr-text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">View Exercises</a>
+        <p class="challenge-text">
+          Get shredded with our elite core-focused training programme.
+          Expert-curated 30-day progression.
+        </p>
+        <div
+          class="challenge-actions"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.25rem;
+          "
+        >
+          <a
+            href="{{ url_for('onboarding.start_challenge', challenge_type='six_pack') }}"
+            class="btn-primary"
+            >Start Challenge <span>→</span></a
+          >
+          <a
+            href="{{ url_for('ai.challenge_six_pack') }}"
+            class="btn-link"
+            style="
+              color: var(--clr-text-muted);
+              font-size: 0.9rem;
+              text-decoration: none;
+              font-weight: 600;
+            "
+            >View Exercises</a
+          >
         </div>
       </div>
       <div class="challenge-icon">🏆</div>
     </div>
   </section>
+
+  <!-- ── MONK MODE Challenge Card ── -->
+  <section class="dash-section challenges-section">
+    <div class="section-header">
+      <h2 class="section-title">🜁 Monk Mode Challenge</h2>
+    </div>
+    <div class="challenge-card premium-card monk-challenge-card">
+      <div class="challenge-content">
+        <div class="challenge-badge fade-in-v2" style="background: linear-gradient(135deg, rgba(0,212,170,0.2), rgba(108,99,255,0.2)); border: 1px solid rgba(0,212,170,0.4); color: #00d4aa;">Elite Protocol</div>
+        <h3 class="challenge-name" style="font-size: 1.6rem; margin: 0.5rem 0;">90-Day Rebirth Protocol</h3>
+        <p class="challenge-text">
+          The most brutal self-transformation system ever built. No pause. No skip.
+          Miss one day and you return to Day 1.
+        </p>
+        {% if monk_status == "active" %}
+        <div style="margin: 1rem 0; display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <div style="background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); border-radius: 12px; padding: 0.6rem 1.2rem; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.5rem; font-weight: 900; color: #00d4aa;">Day {{ monk_current_day }}</span>
+            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--clr-text-muted);">of 90</span>
+          </div>
+          <div style="background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2); border-radius: 12px; padding: 0.6rem 1.2rem; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.5rem; font-weight: 900; color: #6c63ff;">{{ monk_streak }}</span>
+            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--clr-text-muted);">Day Streak</span>
+          </div>
+        </div>
+        {% elif monk_status == "not_started" %}
+        <div style="margin: 0.75rem 0; padding: 0.75rem 1rem; background: rgba(255,165,0,0.06); border: 1px solid rgba(255,165,0,0.2); border-radius: 10px; font-size: 0.85rem; color: var(--clr-text-muted);">
+          ⚠️ <strong style="color: #ffa500;">Warning:</strong> This protocol demands total commitment. Once you start, there is no pausing.
+        </div>
+        {% endif %}
+        <div class="challenge-actions" style="display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
+          <a href="{{ url_for('monk_mode.monk_board') }}" class="btn-primary" style="background: linear-gradient(135deg, #00d4aa, #6c63ff);">
+            {% if monk_status == "active" %}Continue Protocol →{% else %}Begin Transformation →{% endif %}
+          </a>
+          <a href="{{ url_for('monk_mode.monk_board') }}" class="btn-link" style="color: var(--clr-text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">View 90-Day Grid</a>
+        </div>
+      </div>
+      <div class="challenge-icon" style="font-size: 4rem; opacity: 0.8;">🜁</div>
+    </div>
+  </section>
+
 
   <!-- ── Active Fitness Plan ── -->
   <section class="dash-section">
@@ -352,6 +611,71 @@ block extra_css %}<link
       </p>
     </div>
     {% endif %}
+  </section>
+
+  <!-- ── Motivaura Suite ── -->
+  <section
+    class="dash-section motivaura-section"
+    style="
+      background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.05),
+        rgba(236, 72, 153, 0.05)
+      );
+      border-color: rgba(139, 92, 246, 0.2);
+    "
+  >
+    <div class="section-header">
+      <h2
+        class="section-title"
+        style="
+          background: linear-gradient(135deg, #8b5cf6, #ec4899);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        ✨ Motivaura Suite
+      </h2>
+      <span
+        class="plan-badge"
+        style="background: rgba(139, 92, 246, 0.15); color: #c084fc"
+        >Productivity</span
+      >
+    </div>
+    <div class="quick-actions">
+      <a
+        href="{{ url_for('habits.list_habits') }}"
+        class="quick-action-card"
+        style="border-color: rgba(139, 92, 246, 0.2)"
+      >
+        <span class="qa-icon">🔁</span>
+        <span class="qa-label">Habits</span>
+      </a>
+      <a
+        href="{{ url_for('timetable.list_timetables') }}"
+        class="quick-action-card"
+        style="border-color: rgba(139, 92, 246, 0.2)"
+      >
+        <span class="qa-icon">📅</span>
+        <span class="qa-label">Schedule</span>
+      </a>
+      <a
+        href="{{ url_for('journal.list_entries') }}"
+        class="quick-action-card"
+        style="border-color: rgba(139, 92, 246, 0.2)"
+      >
+        <span class="qa-icon">📓</span>
+        <span class="qa-label">Journal</span>
+      </a>
+      <a
+        href="{{ url_for('achievements.index') }}"
+        class="quick-action-card"
+        style="border-color: rgba(139, 92, 246, 0.2)"
+      >
+        <span class="qa-icon">🏆</span>
+        <span class="qa-label">Badges</span>
+      </a>
+    </div>
   </section>
 
   <!-- ── Quick Actions ── -->
@@ -401,4 +725,5 @@ block extra_css %}<link
   } | tojson }}
 </script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/monk_mode.js') }}"></script>
 {% endblock %}

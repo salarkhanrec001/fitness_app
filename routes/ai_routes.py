@@ -10,6 +10,7 @@ from extensions import db
 from models.fitness_plan import FitnessPlan
 from models.onboarding import OnboardingProfile
 from models.daily_recommendation import DailyRecommendation
+from services.gemini_service import has_ai_api_key, get_ai_connection_status
 
 ai_bp = Blueprint("ai", __name__)
 
@@ -527,13 +528,15 @@ def daily():
 
     # Check cache
     rec = DailyRecommendation.get_today(current_user.id)
-    ai_available = bool(__import__("os").environ.get("GEMINI_API_KEY", "").strip())
+    ai_available = has_ai_api_key()
+    ai_status = get_ai_connection_status()
 
     return render_template(
         "ai/daily.html",
         rec=rec,
         profile=profile,
         ai_available=ai_available,
+        ai_status=ai_status,
     )
 
 
@@ -560,8 +563,14 @@ def daily_generate():
 @login_required
 def coach():
     profile = current_user.profile
-    ai_available = bool(__import__("os").environ.get("GEMINI_API_KEY", "").strip())
-    return render_template("ai/coach.html", profile=profile, ai_available=ai_available)
+    ai_available = has_ai_api_key()
+    ai_status = get_ai_connection_status()
+    return render_template(
+        "ai/coach.html",
+        profile=profile,
+        ai_available=ai_available,
+        ai_status=ai_status,
+    )
 
 
 @ai_bp.route("/chat-api", methods=["POST"])

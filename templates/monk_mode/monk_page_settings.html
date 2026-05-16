@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Monk Mode — Settings{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monk_mode.css') }}?v=3"/>
+<style>
+.mm-page{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.mm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.mm-title{font-family:var(--font-heading,Outfit);font-weight:950;text-transform:uppercase;letter-spacing:.1em;color:rgba(232,234,240,0.95);font-size:1.3rem;margin:0}
+.mm-sub{margin-top:.4rem;color:rgba(139,146,165,0.95);font-weight:700;font-size:.9rem}
+.mm-grid{display:grid;gap:1rem}
+.mm-card{background:linear-gradient(135deg,rgba(6,8,14,0.85),rgba(15,10,30,0.8));border:1px solid rgba(255,255,255,0.06);border-radius:20px;box-shadow:0 16px 50px rgba(0,0,0,0.4);padding:1.2rem;position:relative;overflow:hidden}
+.mm-card::before{content:"";position:absolute;inset:-2px;background:radial-gradient(500px at 5% 0%,rgba(220,38,38,0.06),transparent 50%);pointer-events:none}
+.mm-card-inner{position:relative;z-index:1}
+.mm-section-title{font-weight:950;text-transform:uppercase;letter-spacing:.08em;color:rgba(232,234,240,0.92);font-size:.9rem}
+.mm-section-desc{margin-top:.35rem;color:rgba(139,146,165,0.95);font-weight:700;font-size:.88rem;line-height:1.55}
+.mm-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:.75rem}
+.mm-key{color:rgba(232,234,240,0.95);font-weight:950;letter-spacing:.03em}
+.mm-val{color:rgba(139,146,165,0.95);font-weight:800}
+.mm-rules-list{margin-top:.65rem;display:grid;gap:.35rem}
+.mm-rule-line{display:flex;align-items:center;gap:.5rem;color:rgba(232,234,240,0.82);font-weight:700;font-size:.88rem;padding:.3rem 0}
+.mm-rule-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0;box-shadow:0 0 8px rgba(220,38,38,0.4)}
+.mm-note{margin-top:.85rem;color:rgba(139,146,165,0.7);font-weight:700;font-size:.82rem;line-height:1.5;font-style:italic}
+.btn-danger-mm{background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:#ef4444;padding:.6rem 1.2rem;border-radius:10px;font-weight:800;font-size:.88rem;cursor:pointer;transition:all .2s}
+.btn-danger-mm:hover{background:rgba(220,38,38,0.18);border-color:rgba(220,38,38,0.5)}
+.mm-nav-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(232,234,240,0.85);font-weight:700;font-size:.85rem;text-decoration:none;transition:all .2s}
+.mm-nav-btn:hover{border-color:rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:#fff}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mm-page fade-in-v2">
+  <div class="mm-header">
+    <div>
+      <h2 class="mm-title">🜁 Monk Mode Settings</h2>
+      <div class="mm-sub">Discipline first. Excuses never.</div>
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <a class="mm-nav-btn" href="{{ url_for('monk_mode.monk_days_page') }}">📜 Grid</a>
+      <a class="mm-nav-btn" href="{{ url_for('monk_mode.monk_day_detail', day_index=monk_current_day) }}">🔥 Current Day</a>
+    </div>
+  </div>
+
+  <div class="mm-grid">
+    <div class="mm-card">
+      <div class="mm-card-inner">
+        <div class="mm-section-title">Current Session</div>
+        <div class="mm-section-desc">Your live Monk Mode protocol state.</div>
+        <div class="mm-row">
+          <div><div class="mm-key">🔥 Streak</div><div class="mm-val">{{ monk_streak or 0 }} day(s)</div></div>
+          <div><div class="mm-key">⚡ Level</div><div class="mm-val">{{ level.level_key|replace('_',' ')|title }} ({{ level.progress_percent }}%)</div></div>
+          <div><div class="mm-key">📅 Day</div><div class="mm-val">{{ monk_current_day }} / 90</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mm-card">
+      <div class="mm-card-inner">
+        <div class="mm-section-title">⚠️ Iron Rules</div>
+        <div class="mm-section-desc">Breaking any rule triggers a complete reset.</div>
+        <div class="mm-rules-list">
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>Complete ALL 16 mandatory tasks every day</div>
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>Miss one day = full reset to Day 1</div>
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>24-hour UTC deadline enforced server-side</div>
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>Days must be completed sequentially — no skipping</div>
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>No pause, no resume — 90 days straight</div>
+          <div class="mm-rule-line"><span class="mm-rule-dot"></span>All badges revoked on reset</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mm-card">
+      <div class="mm-card-inner">
+        <div class="mm-section-title">💀 Danger Zone</div>
+        <div class="mm-section-desc">These actions permanently affect your progress.</div>
+        <div class="mm-row">
+          <div>
+            <div class="mm-key">Manual Reset</div>
+            <div class="mm-val">Resets everything back to Day 1.</div>
+          </div>
+          <button type="button" class="btn-danger-mm" id="monk-reset-btn">↩️ Reset to Day 1</button>
+        </div>
+        <div class="mm-note">This will erase all progress, badges, and streak. Use only if you want a fresh start.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const btn=document.getElementById("monk-reset-btn");
+  if(!btn)return;
+  btn.addEventListener("click",async()=>{
+    const ok=window.confirm("💀 DANGER: This will reset ALL Monk Mode progress to Day 1. Badges revoked. Streak erased. Are you sure?");
+    if(!ok)return;
+    if(window.showToast)window.showToast("Reset endpoint not wired yet.","warning");
+  });
+})();
+</script>
+{% endblock %}

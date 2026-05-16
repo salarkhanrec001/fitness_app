@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Focus Timer — Motivaura{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Glassmorphism Timer Styles */
+.focus-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.timer-card {
+    background: rgba(20, 20, 25, 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    padding: 4rem 2rem;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="light"] .timer-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.timer-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.timer-content {
+    position: relative;
+    z-index: 1;
+}
+
+.timer-header {
+    margin-bottom: 2rem;
+}
+
+.timer-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff, #a8b2d1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .timer-title {
+    background: linear-gradient(135deg, #111, #444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.timer-subtitle {
+    color: var(--text-secondary, #adb5bd);
+    font-size: 1.1rem;
+}
+
+.timer-display {
+    font-family: 'Outfit', monospace;
+    font-size: 7rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 2.5rem 0;
+    color: var(--text-primary);
+    text-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
+    letter-spacing: -2px;
+    font-variant-numeric: tabular-nums;
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .timer-display {
+    text-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+}
+
+.timer-presets {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 100px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .preset-btn {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.preset-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.preset-btn.active {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.control-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-play {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+}
+
+.btn-play:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
+}
+
+.btn-pause {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+}
+
+.btn-pause:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(245, 158, 11, 0.5);
+}
+
+.btn-reset {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .btn-reset {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-reset:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(-180deg);
+}
+
+[data-theme="light"] .btn-reset:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Breathing animation for active timer */
+@keyframes pulse-ring {
+    0% { transform: scale(1); text-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
+    50% { transform: scale(1.02); text-shadow: 0 0 60px rgba(139, 92, 246, 0.8); }
+    100% { transform: scale(1); text-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
+}
+
+.timer-active .timer-display {
+    animation: pulse-ring 3s infinite ease-in-out;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="focus-container">
+    <div class="timer-card" id="timer-card">
+        <div class="timer-content">
+            <div class="timer-header">
+                <h1 class="timer-title">Focus Time</h1>
+                <p class="timer-subtitle">Deep work requires uninterrupted focus.</p>
+            </div>
+
+            <div class="timer-presets" id="presets">
+                <button class="preset-btn active" data-time="25">25 Min</button>
+                <button class="preset-btn" data-time="15">15 Min</button>
+                <button class="preset-btn" data-time="5">5 Min</button>
+            </div>
+
+            <div class="timer-display" id="time-display">25:00</div>
+
+            <div class="timer-controls">
+                <button class="control-btn btn-play" id="start-btn" aria-label="Start">▶️</button>
+                <button class="control-btn btn-pause" id="pause-btn" aria-label="Pause" style="display:none;">⏸️</button>
+                <button class="control-btn btn-reset" id="reset-btn" aria-label="Reset">🔄</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        let timerInterval;
+        let isRunning = false;
+        let timeRemaining = 25 * 60; // default 25 minutes
+        let initialTime = 25 * 60;
+        
+        const display = document.getElementById("time-display");
+        const startBtn = document.getElementById("start-btn");
+        const pauseBtn = document.getElementById("pause-btn");
+        const resetBtn = document.getElementById("reset-btn");
+        const presetBtns = document.querySelectorAll(".preset-btn");
+        const timerCard = document.getElementById("timer-card");
+        
+        // Notify user via Audio
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playBeep() {
+            if(audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5); // A4
+            
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updateDisplay() {
+            display.textContent = formatTime(timeRemaining);
+            if (isRunning) {
+                document.title = `(${formatTime(timeRemaining)}) Focus Timer`;
+            } else {
+                document.title = `Focus Timer — Motivaura`;
+            }
+        }
+
+        function setPreset(minutes, btnElement) {
+            if (isRunning) {
+                pauseTimer();
+            }
+            presetBtns.forEach(btn => btn.classList.remove("active"));
+            if (btnElement) {
+                btnElement.classList.add("active");
+            }
+            initialTime = minutes * 60;
+            timeRemaining = initialTime;
+            updateDisplay();
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            if (timeRemaining <= 0) timeRemaining = initialTime;
+            
+            // Audio context requires user interaction to start
+            if(audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            isRunning = true;
+            startBtn.style.display = "none";
+            pauseBtn.style.display = "flex";
+            timerCard.classList.add("timer-active");
+            
+            updateDisplay(); // update title immediately
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startBtn.style.display = "flex";
+                    pauseBtn.style.display = "none";
+                    timerCard.classList.remove("timer-active");
+                    
+                    playBeep();
+                    setTimeout(playBeep, 600);
+                    setTimeout(playBeep, 1200);
+                    
+                    if (window.showToast) {
+                        window.showToast("Focus session complete! Great job.", "success");
+                    } else {
+                        alert("Focus session complete! Great job.");
+                    }
+                    
+                    // Reset to initial time visually
+                    timeRemaining = initialTime;
+                    setTimeout(updateDisplay, 1000);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(timerInterval);
+            startBtn.style.display = "flex";
+            pauseBtn.style.display = "none";
+            timerCard.classList.remove("timer-active");
+            updateDisplay();
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeRemaining = initialTime;
+            updateDisplay();
+        }
+
+        // Event Listeners
+        startBtn.addEventListener("click", startTimer);
+        pauseBtn.addEventListener("click", pauseTimer);
+        resetBtn.addEventListener("click", resetTimer);
+        
+        presetBtns.forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const minutes = parseInt(e.target.getAttribute("data-time"));
+                setPreset(minutes, e.target);
+            });
+        });
+        
+        // Init display
+        updateDisplay();
+    });
+</script>
+{% endblock %}

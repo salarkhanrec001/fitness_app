@@ -174,6 +174,20 @@ def index():
     from services.gemini_service import get_proactive_insight
     coach_insight = get_proactive_insight(current_user, profile)
 
+    # Lightweight Monk Mode status for dashboard card only
+    monk_status = "not_started"
+    monk_current_day = 1
+    monk_streak = 0
+    try:
+        from models.monk_mode import MonkModeProgress
+        progress = MonkModeProgress.query.filter_by(user_id=current_user.id).first()
+        if progress:
+            monk_status = progress.status
+            monk_current_day = progress.current_day or 1
+            monk_streak = progress.streak or 0
+    except Exception:
+        pass
+
     return render_template(
         "dashboard.html",
         profile=profile,
@@ -191,4 +205,7 @@ def index():
         weekly_completed_sessions=weekly_completed_sessions,
         weekly_scheduled_sessions=weekly_scheduled_sessions,
         weekly_progress_percent=weekly_progress_percent,
+        monk_status=monk_status,
+        monk_current_day=monk_current_day,
+        monk_streak=monk_streak,
     )

@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+import json
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from extensions import db
+from extensions import db, csrf
 from models.user import User
 from models.streak import Streak
 
@@ -118,6 +119,62 @@ def login():
                                li_identifier=identifier)
 
     return render_template("auth/auth.html", mode="login")
+
+
+@auth_bp.route("/google-callback", methods=["POST"])
+@csrf.exempt
+def google_callback():
+    """Handle Google Sign-In credential token."""
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+        token = request.form.get("credential") or (request.json or {}).get("credential")
+        if not token:
+            flash("Google sign-in failed.", "error")
+            return redirect(url_for("auth.login"))
+
+        client_id = current_app.config.get("GOOGLE_CLIENT_ID", "")
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), client_id)
+
+        email = idinfo.get("email", "").lower()
+        name = idinfo.get("name", "")
+        picture = idinfo.get("picture", "")
+        google_id = idinfo.get("sub", "")
+
+        if not email:
+            flash("Could not retrieve email from Google.", "error")
+            return redirect(url_for("auth.login"))
+
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            # Create new user from Google
+            username = email.split("@")[0]
+            base = username
+            counter = 1
+            while User.query.filter_by(username=username).first():
+                username = f"{base}{counter}"
+                counter += 1
+            user = User(username=username, email=email)
+            user.set_password(google_id + "_google_oauth")  # placeholder password
+            db.session.add(user)
+            db.session.flush()
+            streak = Streak(user_id=user.id)
+            db.session.add(streak)
+            db.session.commit()
+            login_user(user)
+            flash(f"Welcome to FitAI, {user.username}! 🎉", "success")
+            return redirect(url_for("onboarding.step1"))
+        else:
+            login_user(user, remember=True)
+            flash(f"Welcome back, {user.username}! 👋", "success")
+            if not user.onboarding_complete:
+                return redirect(url_for("onboarding.step1"))
+            return redirect(url_for("dashboard.index"))
+    except Exception as e:
+        current_app.logger.error(f"Google OAuth error: {e}")
+        flash("Google sign-in failed. Please try again.", "error")
+        return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/logout")
