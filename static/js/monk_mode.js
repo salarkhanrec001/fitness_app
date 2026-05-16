@@ -11,6 +11,7 @@
     completeTaskUrl: rootEl?.getAttribute("data-complete-task-url") || "/dashboard/monk/complete-task",
     completeDayUrl: rootEl?.getAttribute("data-complete-day-url") || "/dashboard/monk/complete-day",
     gridUrl: rootEl?.getAttribute("data-grid-url") || "/dashboard/monk/days",
+    startUrl: rootEl?.getAttribute("data-start-url") || "/dashboard/monk/page/start",
   };
 
   function getCSRFToken() {
@@ -145,6 +146,10 @@
           refreshStats();
         } catch (err) {
           checkbox.checked = false;
+          if (err.error === "Monk Mode not active") {
+            window.location.href = config.startUrl || "/dashboard/monk/page/start";
+            return;
+          }
           alert(err.error || "Failed to record task");
         }
       };
@@ -167,6 +172,12 @@
         console.error("Monk: Finalize error", err);
         btn.disabled = false;
         btn.textContent = "RETRY FINALIZATION";
+        
+        if (err.error === "Monk Mode not active") {
+          window.location.href = config.startUrl || "/dashboard/monk/page/start";
+          return;
+        }
+        
         alert(err.error || "Failed to finalize day. Ensure all tasks are complete.");
       }
     });
