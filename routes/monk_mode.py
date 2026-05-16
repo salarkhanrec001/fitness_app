@@ -484,6 +484,13 @@ def complete_day():
         db.session.commit()
         return jsonify({"ok": False, "error": "Failed: out-of-order day"}), 400
 
+    # Temporal Lock: Prevent completing future days ahead of schedule
+    if today_day.scheduled_date > utc_date():
+        return jsonify({
+            "ok": False, 
+            "error": f"Patience, Monk. Day {today_day.day_index} hasn't arrived yet. It begins on {today_day.scheduled_date}."
+        }), 429
+
     _, deadline_end = compute_today_deadline_window(progress)
     now = utc_now()
     if now >= deadline_end:
