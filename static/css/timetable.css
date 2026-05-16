@@ -8,21 +8,9 @@
 .stagger-3 { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both; }
 
 .timetable-wrapper {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem 4rem;
-  position: relative;
-  min-height: 100vh;
-}
-
-/* Tactical Background */
-.timetable-wrapper::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 60, 60, 0.02), transparent 70%);
-  z-index: -1;
-  pointer-events: none;
+  padding: 0 1.5rem 4rem;
 }
 
 /* ── Page Header ── */
@@ -364,35 +352,13 @@
 }
 
 .premium-slot-card {
-  background: rgba(10, 10, 12, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.premium-slot-card::after {
-  content: "";
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent);
-  pointer-events: none;
-}
-
-.premium-slot-card.active-now {
-    border-color: var(--monk-red, #ff3c3c);
-    box-shadow: 0 0 20px rgba(255, 60, 60, 0.2);
-    transform: scale(1.02);
-    z-index: 5;
-}
-
-.premium-slot-card.active-now::before {
-    background: var(--monk-red, #ff3c3c);
-    box-shadow: 0 0 10px var(--monk-red, #ff3c3c);
+  transition: all 0.2s;
 }
 
 .premium-slot-card::before {
@@ -466,31 +432,4 @@
   .timeline-content { padding-left: 0; border-left: none; }
   .week-view { grid-template-columns: repeat(1, 1fr); }
   .premium-day-column { min-width: 100%; }
-}
-
-/* Real-time Timeline Line */
-.tt-live-indicator {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #ff3c3c;
-    box-shadow: 0 0 12px #ff3c3c;
-    z-index: 100;
-    pointer-events: none;
-    transition: top 0.5s ease-in-out;
-}
-
-.tt-live-indicator::after {
-    content: "LIVE";
-    position: absolute;
-    right: 5px;
-    top: -12px;
-    background: #ff3c3c;
-    color: #000;
-    font-size: 0.55rem;
-    font-weight: 900;
-    padding: 1px 6px;
-    border-radius: 3px;
-    letter-spacing: 0.05em;
 }
