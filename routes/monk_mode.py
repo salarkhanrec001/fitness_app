@@ -96,10 +96,9 @@ def compute_today_deadline_window(progress: MonkModeProgress) -> Tuple[datetime,
 
 
 def get_day_row(progress: MonkModeProgress) -> MonkModeDay:
-    today = utc_date()
-    day = MonkModeDay.query.filter_by(progress_id=progress.id, scheduled_date=today).first()
+    day = MonkModeDay.query.filter_by(progress_id=progress.id, day_index=progress.current_day).first()
     if not day:
-        raise ValueError("Monk Mode day not found for today. (start/initialize required)")
+        raise ValueError(f"Monk Mode day index {progress.current_day} not found. (start required)")
     return day
 
 
@@ -642,6 +641,9 @@ def status():
             "The transformation is nearly complete. Do not falter."
         ]
         protocol_quote = quotes[min((progress.current_day - 1) // 10, 8)]
+
+        today_day = MonkModeDay.query.filter_by(progress_id=progress.id, day_index=progress.current_day).first()
+        current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=progress.current_day).all() if today_day else []
 
         return jsonify(
             {
