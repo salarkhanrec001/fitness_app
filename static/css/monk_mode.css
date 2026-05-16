@@ -294,3 +294,54 @@
     justify-content: center;
   }
 }
+
+/* --- AAA Perfection Upgrades --- */
+@keyframes mmScanner {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.monk-task-grid {
+    position: relative;
+    overflow: hidden;
+    padding: 0.5rem;
+}
+
+.monk-task-grid::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--monk-red), transparent);
+    animation: mmScanner 4s linear infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes mmFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.monk-task-item {
+    animation: mmFadeIn 0.5s ease backwards;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.monk-task-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 60, 60, 0.3) !important;
+    transform: translateX(5px);
+    box-shadow: -5px 0 15px rgba(255, 60, 60, 0.1);
+}
+
+.monk-rules-subtitle {
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--monk-red);
+    opacity: 0.8;
+}

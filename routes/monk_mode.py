@@ -621,16 +621,36 @@ def status():
         if MonkModeDay.query.filter_by(progress_id=progress.id).count() < MONK_TOTAL_DAYS:
             ensure_days_and_tasks_initialized(progress)
 
-        today_day = MonkModeDay.query.filter_by(progress_id=progress.id, scheduled_date=utc_date()).first()
-        current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=today_day.day_index).all() if today_day else []
-
         level = MonkModeLevel.query.filter_by(progress_id=progress.id).first()
+        
+        # AAA Touches: Dynamic Mission Focus & Quotes
+        mission_focus = [
+            "Initiation Phase", "Neural Re-wiring", "Silent Warfare", 
+            "The Breaking Point", "Iron Foundations", "Stoic Resilience",
+            "The Void Walk", "Neural Optimization", "Final Ascension"
+        ][min((progress.current_day - 1) // 10, 8)]
+        
+        quotes = [
+            "Discipline is the bridge between goals and accomplishment.",
+            "He who has a why to live can bear almost any how.",
+            "Freedom is found in the discipline of the self.",
+            "The soul is dyed the color of its thoughts. Keep them pure.",
+            "Suffer the pain of discipline or suffer the pain of regret.",
+            "Silence is the ultimate weapon of the wise.",
+            "A monk is not one who avoids the world, but one who masters it.",
+            "Victory belongs to the most persevering.",
+            "The transformation is nearly complete. Do not falter."
+        ]
+        protocol_quote = quotes[min((progress.current_day - 1) // 10, 8)]
+
         return jsonify(
             {
                 "ok": True,
                 "status": progress.status,
                 "current_day": progress.current_day,
                 "streak": progress.streak,
+                "mission_focus": mission_focus,
+                "protocol_quote": protocol_quote,
                 "today": {"day_index": today_day.day_index if today_day else None, "status": today_day.status if today_day else None},
                 "tasks": [
                     {"task_key": t.task_key, "status": t.status, "completed_at": t.completed_at.isoformat() if t.completed_at else None}
