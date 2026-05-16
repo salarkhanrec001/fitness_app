@@ -101,16 +101,20 @@ def toggle_slot(slot_id):
 @timetable_bp.route('/slot/<int:slot_id>/clone', methods=['POST'])
 @login_required
 def clone_slot(slot_id):
-    target_days = request.form.getlist('target_days')
-    if not target_days:
-        flash('Select at least one day to clone to.', 'warning')
-        return redirect(request.referrer or url_for('timetable.list_timetables'))
-    
-    success, error = TimetableService.clone_slot(slot_id, current_user.id, [int(d) for d in target_days])
-    if error:
-        flash(error, 'danger')
-    else:
-        flash(f'Slot duplicated to {len(target_days)} days!', 'success')
+    try:
+        target_days = request.form.getlist('target_days')
+        if not target_days:
+            flash('Select at least one day to clone to.', 'warning')
+            return redirect(request.referrer or url_for('timetable.list_timetables'))
+        
+        success, error = TimetableService.clone_slot(slot_id, current_user.id, [int(d) for d in target_days])
+        if error:
+            flash(error, 'danger')
+        else:
+            flash(f'Slot duplicated to {len(target_days)} days!', 'success')
+    except Exception as e:
+        flash(f'Protocol Error: {str(e)}', 'danger')
+        
     return redirect(request.referrer or url_for('timetable.list_timetables'))
 
 
