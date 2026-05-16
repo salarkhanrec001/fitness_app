@@ -79,30 +79,3 @@ class TimetableService:
             Timetable.user_id == user_id, Timetable.is_active == True,
             TimeSlot.day_of_week == today_dow,
         ).order_by(TimeSlot.start_time).all()
-
-    @staticmethod
-    def clone_slot(slot_id, user_id, target_days):
-        try:
-            source = TimeSlot.query.join(Timetable).filter(
-                TimeSlot.id == slot_id, Timetable.user_id == user_id
-            ).first()
-            if not source:
-                return False, 'Source slot not found.'
-            
-            for day in target_days:
-                new_slot = TimeSlot(
-                    timetable_id=source.timetable_id,
-                    day_of_week=day,
-                    start_time=source.start_time,
-                    end_time=source.end_time,
-                    task=source.task,
-                    category=source.category,
-                    notes=source.notes
-                )
-                db.session.add(new_slot)
-            
-            db.session.commit()
-            return True, None
-        except Exception as e:
-            db.session.rollback()
-            return False, str(e)

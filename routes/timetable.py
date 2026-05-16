@@ -98,38 +98,6 @@ def toggle_slot(slot_id):
     return redirect(request.referrer or url_for('timetable.list_timetables'))
 
 
-@timetable_bp.route('/slot/<int:slot_id>/clone', methods=['POST'])
-@login_required
-def clone_slot(slot_id):
-    try:
-        # 1. Sanitize Inputs
-        raw_days = request.form.getlist('target_days')
-        target_days = []
-        for d in raw_days:
-            try:
-                target_days.append(int(d))
-            except (ValueError, TypeError):
-                continue
-
-        if not target_days:
-            flash('Mission Briefing: Select at least one target day.', 'warning')
-            return redirect(request.referrer or url_for('timetable.list_timetables'))
-        
-        # 2. Execute with Service
-        success, error = TimetableService.clone_slot(slot_id, current_user.id, target_days)
-        
-        if error:
-            flash(f'Protocol Warning: {error}', 'danger')
-        else:
-            flash(f'Mission Success: Task replicated across {len(target_days)} days.', 'success')
-            
-    except Exception as e:
-        # 3. No-Crash Guarantee
-        flash(f'System Alert: {str(e)}', 'danger')
-        
-    return redirect(request.referrer or url_for('timetable.list_timetables'))
-
-
 @timetable_bp.route('/slot/<int:slot_id>/delete', methods=['POST'])
 @login_required
 def delete_slot(slot_id):
