@@ -140,6 +140,9 @@ def create_app(config_name=None):
 
         @app.errorhandler(500)
         def server_error(e):
+            import traceback
+            app.logger.error(f"500 Internal Server Error: {e}")
+            traceback.print_exc()
             return render_template("errors/500.html"), 500
 
         @app.errorhandler(429)
@@ -156,6 +159,10 @@ def create_app(config_name=None):
         @app.template_global()
         def current_year():
             return datetime.now(timezone.utc).year
+
+        @app.context_processor
+        def inject_day_names():
+            return {'day_names': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
 
     return app
 
