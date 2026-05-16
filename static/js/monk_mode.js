@@ -18,78 +18,90 @@
     return el ? el.getAttribute("content") : null;
   }
 
-  // --- AAA SFX System ---
+  // --- AAA SFX ---
   function playBeep(type) {
     if (localStorage.getItem("monk-sfx-enabled") !== "1") return;
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
+      osc.connect(gain); gain.connect(ctx.destination);
       const now = ctx.currentTime;
       if (type === "check") {
-        osc.type = "sine";
         osc.frequency.setValueAtTime(880, now);
         osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start();
-        osc.stop(now + 0.2);
+        osc.start(); osc.stop(now + 0.2);
       } else if (type === "complete") {
-        osc.type = "square";
         osc.frequency.setValueAtTime(200, now);
         osc.frequency.linearRampToValueAtTime(800, now + 0.5);
         gain.gain.setValueAtTime(0.05, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.5);
-        osc.start();
-        osc.stop(now + 0.5);
+        osc.start(); osc.stop(now + 0.5);
       }
     } catch (e) {}
   }
 
-  // --- AAA Confetti System ---
-  function launchConfetti() {
+  // --- AAA Digital Particles ---
+  function initParticles() {
+    if (!rootEl) return;
     const canvas = document.createElement("canvas");
-    canvas.style.position = "fixed";
+    canvas.className = "monk-particles";
+    canvas.style.position = "absolute";
     canvas.style.inset = "0";
     canvas.style.pointerEvents = "none";
-    canvas.style.zIndex = "10000";
-    document.body.appendChild(canvas);
-    
+    canvas.style.zIndex = "0";
+    canvas.style.opacity = "0.3";
+    rootEl.appendChild(canvas);
+
     const ctx = canvas.getContext("2d");
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
-    
-    const pieces = [];
-    for(let i=0; i<100; i++) {
-      pieces.push({
-        x: Math.random() * w,
-        y: h + Math.random() * 100,
-        r: 4 + Math.random() * 6,
-        color: Math.random() > 0.5 ? "#ff3c3c" : "#fff",
-        vx: -2 + Math.random() * 4,
-        vy: -15 - Math.random() * 10
+    let w, h, particles = [];
+
+    const resize = () => {
+      w = canvas.width = rootEl.offsetWidth;
+      h = canvas.height = rootEl.offsetHeight;
+    };
+    window.addEventListener("resize", resize);
+    resize();
+
+    for(let i=0; i<40; i++) {
+      particles.push({
+        x: Math.random() * w, y: Math.random() * h,
+        s: Math.random() * 2,
+        vx: -0.5 + Math.random(), vy: -0.5 + Math.random()
       });
     }
-    
+
     function draw() {
-      ctx.clearRect(0, 0, w, h);
-      pieces.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.5; // gravity
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = "rgba(255, 60, 60, 0.5)";
+      particles.forEach(p => {
+        ctx.fillRect(p.x, p.y, p.s, p.s);
+        p.x += p.vx; p.y += p.vy;
+        if(p.x<0) p.x=w; if(p.x>w) p.x=0;
+        if(p.y<0) p.y=h; if(p.y>h) p.y=0;
       });
-      if (pieces.some(p => p.y < h + 100)) requestAnimationFrame(draw);
-      else canvas.remove();
+      requestAnimationFrame(draw);
     }
     draw();
+  }
+
+  // --- AAA Mouse Tracking ---
+  function initMouseTracking() {
+    if (!rootEl) return;
+    rootEl.addEventListener("mousemove", (e) => {
+      const rect = rootEl.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      rootEl.style.setProperty("--mouse-x", `${x}%`);
+      rootEl.style.setProperty("--mouse-y", `${y}%`);
+    });
+  }
+
+  function triggerGlitch() {
+    rootEl?.classList.add("monk-glitch-active");
+    setTimeout(() => rootEl?.classList.remove("monk-glitch-active"), 200);
   }
 
   async function apiPost(url, body) {
@@ -99,10 +111,10 @@
       credentials: "same-origin",
       body: JSON.stringify(body || {}),
     });
-    if (res.status === 403) throw { ok: false, error: "Security Session Expired (CSRF). Refresh required." };
+    if (res.status === 403) throw { ok: false, error: "CSRF Expired. Refresh required." };
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: "Server error: " + text.slice(0, 100) }; }
+    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: "Server error" }; }
     if (!res.ok) throw data;
     return data;
   }
@@ -115,7 +127,7 @@
     });
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: text.slice(0, 100) }; }
+    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: "Server error" }; }
     if (!res.ok) throw data;
     return data;
   }
@@ -123,8 +135,6 @@
   function initSfxToggle() {
     const btn = qs("#monk-sfx-toggle");
     if (!btn) return;
-    const saved = localStorage.getItem("monk-sfx-enabled") || "1";
-    localStorage.setItem("monk-sfx-enabled", saved);
     const apply = () => {
       const enabled = localStorage.getItem("monk-sfx-enabled") === "1";
       const status = qs(".monk-sfx-status", btn);
@@ -138,7 +148,6 @@
       const cur = localStorage.getItem("monk-sfx-enabled") === "1";
       localStorage.setItem("monk-sfx-enabled", cur ? "0" : "1");
       apply();
-      if (!cur) playBeep("check");
     };
   }
 
@@ -151,10 +160,9 @@
       const ringFill = qs("#monk-ring-fill");
       const streakEl = qs("#monk-streak-val");
       const currentDayEl = qs("#monk-current-day");
-      
-      // Update Mission Focus & Quotes
       const titleEl = qs(".monk-title-block p");
       const quoteEl = qs(".monk-rules-subtitle");
+
       if (titleEl && data.mission_focus) titleEl.textContent = data.mission_focus.toUpperCase();
       if (quoteEl && data.protocol_quote) quoteEl.textContent = data.protocol_quote;
 
@@ -175,7 +183,7 @@
         if (remainingEl) remainingEl.textContent = `${pendingCount} PENDING`;
 
         taskGrid.innerHTML = data.tasks.map(t => `
-          <div class="monk-task-item premium-card mm-task" data-task-key="${t.task_key}" style="animation: fadeIn 0.4s ease forwards;">
+          <div class="monk-task-item mm-task" data-task-key="${t.task_key}" style="animation: mmFadeIn 0.4s ease forwards;">
             <div style="display: flex; align-items: center; gap: 1rem;">
               <label class="monk-checkbox">
                 <input type="checkbox" class="monk-task-checkbox" ${t.status === 'completed' ? 'checked disabled' : ''}>
@@ -189,9 +197,7 @@
         `).join('');
         initCheckboxes();
       }
-    } catch (e) {
-      console.error("Monk refresh failed", e);
-    }
+    } catch (e) {}
   }
 
   function initCheckboxes() {
@@ -204,6 +210,7 @@
         if (!checkbox.checked) { checkbox.checked = true; return; }
         try {
           playBeep("check");
+          triggerGlitch();
           await apiPost(config.completeTaskUrl, { task_key: taskKey });
           refreshStats();
         } catch (err) {
@@ -224,7 +231,7 @@
         btn.textContent = "VERIFYING...";
         await apiPost(config.completeDayUrl, {});
         playBeep("complete");
-        launchConfetti();
+        triggerGlitch();
         btn.textContent = "PROTOCOL CLEARED";
         setTimeout(() => window.location.href = config.gridUrl, 2000);
       } catch (err) {
@@ -238,6 +245,8 @@
 
   function bootstrap() {
     initSfxToggle();
+    initParticles();
+    initMouseTracking();
     initFinalize();
     initCheckboxes();
     refreshStats();
