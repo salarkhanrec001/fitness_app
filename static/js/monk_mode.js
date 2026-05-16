@@ -4,6 +4,15 @@
   const qs = (sel, root = document) => root.querySelector(sel);
   const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  // Global container for URL discovery
+  const rootEl = qs("#monk-mode-section");
+  const config = {
+    statusUrl: rootEl?.getAttribute("data-status-url") || "/dashboard/monk/status",
+    completeTaskUrl: rootEl?.getAttribute("data-complete-task-url") || "/dashboard/monk/complete-task",
+    completeDayUrl: rootEl?.getAttribute("data-complete-day-url") || "/dashboard/monk/complete-day",
+    gridUrl: rootEl?.getAttribute("data-grid-url") || "/dashboard/monk/days",
+  };
+
   function getCSRFToken() {
     const el = document.querySelector('meta[name="csrf-token"]');
     return el ? el.getAttribute("content") : null;
@@ -19,12 +28,19 @@
       credentials: "same-origin",
       body: JSON.stringify(body || {}),
     });
+    
     if (res.status === 403) {
       throw { ok: false, error: "Security Session Expired (CSRF). Please refresh the page." };
     }
+    
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: "Server returned non-JSON response: " + text.slice(0, 50) }; }
+    try { 
+      data = JSON.parse(text); 
+    } catch (e) { 
+      data = { ok: false, error: "Server error: " + text.slice(0, 100) }; 
+    }
+    
     if (!res.ok) throw data;
     return data;
   }
@@ -35,9 +51,11 @@
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
     });
+    
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: text }; }
+    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: text.slice(0, 100) }; }
+    
     if (!res.ok) throw data;
     return data;
   }
@@ -68,7 +86,7 @@
 
   async function refreshStats() {
     try {
-      const data = await apiGet("/dashboard/monk/status");
+      const data = await apiGet(config.statusUrl);
       if (!data.ok) return;
 
       const percentEl = qs("#monk-progress-percent");
@@ -86,7 +104,6 @@
       if (streakEl) streakEl.textContent = data.streak;
       if (currentDayEl && data.today) currentDayEl.textContent = data.today.day_index || 1;
 
-      // Update Task List if on dashboard
       const taskGrid = qs("#monk-task-grid");
       if (taskGrid && data.tasks) {
         const remainingEl = qs("#monk-tasks-remaining");
@@ -106,8 +123,6 @@
             </div>
           </div>
         `).join('');
-
-        // Re-bind checkboxes
         initCheckboxes();
       }
     } catch (e) {
@@ -126,7 +141,7 @@
         if (!checkbox.checked) { checkbox.checked = true; return; }
 
         try {
-          await apiPost("/dashboard/monk/complete-task", { task_key: taskKey });
+          await apiPost(config.completeTaskUrl, { task_key: taskKey });
           refreshStats();
         } catch (err) {
           checkbox.checked = false;
@@ -145,10 +160,9 @@
       try {
         btn.disabled = true;
         btn.textContent = "FINALIZING...";
-        const data = await apiPost("/dashboard/monk/complete-day", {});
+        const data = await apiPost(config.completeDayUrl, {});
         console.log("Monk: Finalize success", data);
-        // Take user to the Grid page instead of just reloading
-        window.location.href = "/dashboard/monk/days";
+        window.location.href = config.gridUrl;
       } catch (err) {
         console.error("Monk: Finalize error", err);
         btn.disabled = false;
@@ -166,7 +180,6 @@
     refreshStats();
   }
 
-  // Startup: Run immediately if DOM ready, otherwise wait
   if (document.readyState === "complete" || document.readyState === "interactive") {
     bootstrap();
   } else {

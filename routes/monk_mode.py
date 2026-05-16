@@ -613,35 +613,39 @@ def complete_task():
 @monk_mode_bp.route("/status", methods=["GET"])
 @login_required
 def status():
-    progress = get_or_create_progress(current_user.id)
-    if progress.status != "active":
-        return jsonify({"ok": True, "status": progress.status})
+    try:
+        progress = get_or_create_progress(current_user.id)
+        if progress.status != "active":
+            return jsonify({"ok": True, "status": progress.status})
 
-    if MonkModeDay.query.filter_by(progress_id=progress.id).count() < MONK_TOTAL_DAYS:
-        ensure_days_and_tasks_initialized(progress)
+        if MonkModeDay.query.filter_by(progress_id=progress.id).count() < MONK_TOTAL_DAYS:
+            ensure_days_and_tasks_initialized(progress)
 
-    today_day = MonkModeDay.query.filter_by(progress_id=progress.id, scheduled_date=utc_date()).first()
-    current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=today_day.day_index).all() if today_day else []
+        today_day = MonkModeDay.query.filter_by(progress_id=progress.id, scheduled_date=utc_date()).first()
+        current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=today_day.day_index).all() if today_day else []
 
-    level = MonkModeLevel.query.filter_by(progress_id=progress.id).first()
-    return jsonify(
-        {
-            "ok": True,
-            "status": progress.status,
-            "current_day": progress.current_day,
-            "streak": progress.streak,
-            "today": {"day_index": today_day.day_index if today_day else None, "status": today_day.status if today_day else None},
-            "tasks": [
-                {"task_key": t.task_key, "status": t.status, "completed_at": t.completed_at.isoformat() if t.completed_at else None}
-                for t in current_tasks
-            ],
-            "level": {
-                "level_key": level.level_key if level else "weak_mind",
-                "level_index": level.level_index if level else 1,
-                "progress_percent": level.progress_percent if level else 0,
-            },
-        }
-    )
+        level = MonkModeLevel.query.filter_by(progress_id=progress.id).first()
+        return jsonify(
+            {
+                "ok": True,
+                "status": progress.status,
+                "current_day": progress.current_day,
+                "streak": progress.streak,
+                "today": {"day_index": today_day.day_index if today_day else None, "status": today_day.status if today_day else None},
+                "tasks": [
+                    {"task_key": t.task_key, "status": t.status, "completed_at": t.completed_at.isoformat() if t.completed_at else None}
+                    for t in current_tasks
+                ],
+                "level": {
+                    "level_key": level.level_key if level else "weak_mind",
+                    "level_index": level.level_index if level else 1,
+                    "progress_percent": level.progress_percent if level else 0,
+                },
+            }
+        )
+    except Exception as e:
+        current_app.logger.exception("Monk status failed")
+        return jsonify({"ok": False, "error": f"Server error: {e}"}), 500
 
 
 # ---------------------------------------------------------------------------
