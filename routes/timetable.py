@@ -102,18 +102,30 @@ def toggle_slot(slot_id):
 @login_required
 def clone_slot(slot_id):
     try:
-        target_days = request.form.getlist('target_days')
+        # 1. Sanitize Inputs
+        raw_days = request.form.getlist('target_days')
+        target_days = []
+        for d in raw_days:
+            try:
+                target_days.append(int(d))
+            except (ValueError, TypeError):
+                continue
+
         if not target_days:
-            flash('Select at least one day to clone to.', 'warning')
+            flash('Mission Briefing: Select at least one target day.', 'warning')
             return redirect(request.referrer or url_for('timetable.list_timetables'))
         
-        success, error = TimetableService.clone_slot(slot_id, current_user.id, [int(d) for d in target_days])
+        # 2. Execute with Service
+        success, error = TimetableService.clone_slot(slot_id, current_user.id, target_days)
+        
         if error:
-            flash(error, 'danger')
+            flash(f'Protocol Warning: {error}', 'danger')
         else:
-            flash(f'Slot duplicated to {len(target_days)} days!', 'success')
+            flash(f'Mission Success: Task replicated across {len(target_days)} days.', 'success')
+            
     except Exception as e:
-        flash(f'Protocol Error: {str(e)}', 'danger')
+        # 3. No-Crash Guarantee
+        flash(f'System Alert: {str(e)}', 'danger')
         
     return redirect(request.referrer or url_for('timetable.list_timetables'))
 
