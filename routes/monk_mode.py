@@ -660,6 +660,8 @@ def status():
         today_day = MonkModeDay.query.filter_by(progress_id=progress.id, day_index=progress.current_day).first()
         current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=progress.current_day).all() if today_day else []
 
+        days = MonkModeDay.query.filter_by(progress_id=progress.id).order_by(MonkModeDay.day_index.asc()).all()
+
         return jsonify(
             {
                 "ok": True,
@@ -670,6 +672,7 @@ def status():
                 "protocol_quote": protocol_quote,
                 "rank_title": rank_title,
                 "today": {"day_index": today_day.day_index if today_day else None, "status": today_day.status if today_day else None},
+                "days": [{"day_index": d.day_index, "status": d.status} for d in days],
                 "tasks": [
                     {"task_key": t.task_key, "status": t.status, "completed_at": t.completed_at.isoformat() if t.completed_at else None}
                     for t in current_tasks

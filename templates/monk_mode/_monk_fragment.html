@@ -20,24 +20,34 @@
         </header>
 
         <div class="monk-mode-body">
-            <!-- --- Hall of Badges (Horizontal Scroll) --- -->
-            <div class="monk-badges-strip premium-card" style="margin-bottom: 1.5rem; padding: 1rem; overflow-x: auto;">
+            <!-- --- Hall of Badges --- -->
+            <div class="monk-badges-strip premium-card" style="margin-bottom: 1rem; padding: 1rem; overflow-x: auto;">
                 <p style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--monk-red); margin-bottom: 0.75rem; text-transform: uppercase;">
                     Milestone Progress
                 </p>
                 <div style="display: flex; gap: 1.5rem; min-width: max-content; padding-bottom: 0.5rem; position: relative;">
-                    <!-- Path Background -->
                     <div class="monk-badge-path"></div>
-                    
-                    {% for day_target, name in [
-                        (7, 'Survivor'), (14, 'Warrior'), (30, 'Grinder'), 
-                        (60, 'Iron Will'), (90, 'Ascended')
-                    ] %}
+                    {% for day_target, name in [(7, 'Survivor'), (14, 'Warrior'), (30, 'Grinder'), (60, 'Iron Will'), (90, 'Ascended')] %}
                     <div class="monk-badge-slot" title="PROTOCOL: Survive {{ day_target }} Days to unlock {{ name }} Badge">
                         <div class="monk-badge-icon locked" id="badge-day-{{ day_target }}">🏆</div>
-                        <span style="display: block; font-size: 0.6rem; font-weight: 800; margin-top: 0.75rem; color: #8b92a5; text-transform: uppercase; letter-spacing: 0.05em;">Day {{ day_target }}</span>
+                        <span style="display: block; font-size: 0.6rem; font-weight: 800; margin-top: 0.75rem; color: #8b92a5; text-transform: uppercase;">Day {{ day_target }}</span>
                     </div>
                     {% endfor %}
+                </div>
+            </div>
+
+            <!-- --- The War Map (90-Day Grid) --- -->
+            <div class="premium-card monk-warmap-section" style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <p style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--monk-red); text-transform: uppercase; margin: 0;">
+                        90-Day War Map
+                    </p>
+                    <button class="monk-minimize-btn" id="monk-warmap-toggle">SHOW MAP</button>
+                </div>
+                <div id="monk-warmap-container" style="display: none;">
+                    <div class="monk-warmap-grid" id="monk-warmap-grid">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
 

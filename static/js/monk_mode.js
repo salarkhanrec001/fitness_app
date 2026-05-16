@@ -104,24 +104,39 @@
     setTimeout(() => rootEl?.classList.remove("monk-glitch-active"), 200);
   }
 
-  // --- Task Collapse System ---
-  function initTaskToggle() {
-    const btn = qs("#monk-tasks-toggle");
-    const container = qs("#monk-task-container");
-    if (!btn || !container) return;
-
-    const saved = localStorage.getItem("monk-tasks-collapsed") === "1";
-    if (saved) {
-      container.style.display = "none";
-      btn.textContent = "EXPAND";
+  // --- Toggles System ---
+  function initToggles() {
+    // Tasks Toggle
+    const taskBtn = qs("#monk-tasks-toggle");
+    const taskContainer = qs("#monk-task-container");
+    if (taskBtn && taskContainer) {
+      if (localStorage.getItem("monk-tasks-collapsed") === "1") {
+        taskContainer.style.display = "none";
+        taskBtn.textContent = "EXPAND";
+      }
+      taskBtn.onclick = () => {
+        const isHidden = taskContainer.style.display === "none";
+        taskContainer.style.display = isHidden ? "block" : "none";
+        taskBtn.textContent = isHidden ? "MINIMIZE" : "EXPAND";
+        localStorage.setItem("monk-tasks-collapsed", isHidden ? "0" : "1");
+      };
     }
 
-    btn.onclick = () => {
-      const isHidden = container.style.display === "none";
-      container.style.display = isHidden ? "block" : "none";
-      btn.textContent = isHidden ? "MINIMIZE" : "EXPAND";
-      localStorage.setItem("monk-tasks-collapsed", isHidden ? "0" : "1");
-    };
+    // War Map Toggle
+    const mapBtn = qs("#monk-warmap-toggle");
+    const mapContainer = qs("#monk-warmap-container");
+    if (mapBtn && mapContainer) {
+      if (localStorage.getItem("monk-warmap-expanded") === "1") {
+        mapContainer.style.display = "block";
+        mapBtn.textContent = "HIDE MAP";
+      }
+      mapBtn.onclick = () => {
+        const isShown = mapContainer.style.display === "block";
+        mapContainer.style.display = isShown ? "none" : "block";
+        mapBtn.textContent = isShown ? "SHOW MAP" : "HIDE MAP";
+        localStorage.setItem("monk-warmap-expanded", isShown ? "0" : "1");
+      };
+    }
   }
 
   async function apiPost(url, body) {
@@ -208,31 +223,34 @@
       const badgeSlots = qsa(".monk-badge-slot");
       const pathLine = qs(".monk-badge-path");
       let lastUnlockedIndex = -1;
-
       badgeSlots.forEach((slot, idx) => {
         const title = slot.getAttribute("title");
         const match = title.match(/Survive (\d+) Days/);
         if (match) {
           const target = parseInt(match[1]);
-          const icon = qs(".monk-badge-icon", slot);
           if (data.streak >= target) {
+            const icon = qs(".monk-badge-icon", slot);
             icon?.classList.remove("locked");
             icon?.classList.add("unlocked");
             slot.style.opacity = "1";
             lastUnlockedIndex = idx;
-          } else {
-            icon?.classList.add("locked");
-            icon?.classList.remove("unlocked");
-            slot.style.opacity = "0.5";
           }
         }
       });
-      
-      // Dynamic Path Glow
       if (pathLine) {
         const pct = (lastUnlockedIndex + 1) / badgeSlots.length * 100;
         pathLine.style.background = `linear-gradient(90deg, var(--monk-red) ${pct}%, rgba(255,255,255,0.05) ${pct}%)`;
-        pathLine.style.boxShadow = lastUnlockedIndex >= 0 ? "0 0 10px rgba(255, 60, 60, 0.2)" : "none";
+      }
+
+      // Update War Map
+      const mapGrid = qs("#monk-warmap-grid");
+      if (mapGrid && data.days) {
+        mapGrid.innerHTML = data.days.map(d => {
+          let cls = "monk-warmap-cell";
+          if (d.status === 'completed') cls += " completed";
+          else if (d.day_index === data.current_day) cls += " current";
+          return `<div class="${cls}" title="Day ${d.day_index}: ${d.status.toUpperCase()}"></div>`;
+        }).join('');
       }
 
       const taskGrid = qs("#monk-task-grid");
@@ -306,7 +324,7 @@
     initSfxToggle();
     initParticles();
     initMouseTracking();
-    initTaskToggle();
+    initToggles();
     initFinalize();
     initCheckboxes();
     refreshStats();
