@@ -138,12 +138,16 @@
     if (!btn) return;
 
     btn.addEventListener("click", async () => {
+      console.log("Monk: Finalize clicked");
       try {
         btn.disabled = true;
         btn.textContent = "FINALIZING...";
-        await apiPost("/dashboard/monk/complete-day", {});
-        window.location.reload();
+        const data = await apiPost("/dashboard/monk/complete-day", {});
+        console.log("Monk: Finalize success", data);
+        // Take user to the Grid page instead of just reloading
+        window.location.href = "/dashboard/monk/days";
       } catch (err) {
+        console.error("Monk: Finalize error", err);
         btn.disabled = false;
         btn.textContent = "RETRY FINALIZATION";
         alert(err.error || "Failed to finalize day. Ensure all tasks are complete.");
@@ -151,11 +155,18 @@
     });
   }
 
-  // Startup
-  document.addEventListener("DOMContentLoaded", () => {
+  function bootstrap() {
+    console.log("Monk: Bootstrap starting...");
     initSfxToggle();
     initFinalize();
     initCheckboxes();
     refreshStats();
-  });
+  }
+
+  // Startup: Run immediately if DOM ready, otherwise wait
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    bootstrap();
+  } else {
+    document.addEventListener("DOMContentLoaded", bootstrap);
+  }
 })();
