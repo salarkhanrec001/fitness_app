@@ -19,9 +19,12 @@
       credentials: "same-origin",
       body: JSON.stringify(body || {}),
     });
+    if (res.status === 403) {
+      throw { ok: false, error: "Security Session Expired (CSRF). Please refresh the page." };
+    }
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: text }; }
+    try { data = JSON.parse(text); } catch (e) { data = { ok: false, error: "Server returned non-JSON response: " + text.slice(0, 50) }; }
     if (!res.ok) throw data;
     return data;
   }
