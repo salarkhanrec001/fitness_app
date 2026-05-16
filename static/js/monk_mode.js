@@ -206,9 +206,12 @@
 
       // Update Badge Strip
       const badgeSlots = qsa(".monk-badge-slot");
-      badgeSlots.forEach(slot => {
+      const pathLine = qs(".monk-badge-path");
+      let lastUnlockedIndex = -1;
+
+      badgeSlots.forEach((slot, idx) => {
         const title = slot.getAttribute("title");
-        const match = title.match(/Reach Day (\d+)/);
+        const match = title.match(/Survive (\d+) Days/);
         if (match) {
           const target = parseInt(match[1]);
           const icon = qs(".monk-badge-icon", slot);
@@ -216,11 +219,21 @@
             icon?.classList.remove("locked");
             icon?.classList.add("unlocked");
             slot.style.opacity = "1";
+            lastUnlockedIndex = idx;
           } else {
-            slot.style.opacity = "0.4";
+            icon?.classList.add("locked");
+            icon?.classList.remove("unlocked");
+            slot.style.opacity = "0.5";
           }
         }
       });
+      
+      // Dynamic Path Glow
+      if (pathLine) {
+        const pct = (lastUnlockedIndex + 1) / badgeSlots.length * 100;
+        pathLine.style.background = `linear-gradient(90deg, var(--monk-red) ${pct}%, rgba(255,255,255,0.05) ${pct}%)`;
+        pathLine.style.boxShadow = lastUnlockedIndex >= 0 ? "0 0 10px rgba(255, 60, 60, 0.2)" : "none";
+      }
 
       const taskGrid = qs("#monk-task-grid");
       if (taskGrid && data.tasks) {

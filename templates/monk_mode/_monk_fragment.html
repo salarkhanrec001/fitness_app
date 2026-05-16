@@ -25,14 +25,17 @@
                 <p style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--monk-red); margin-bottom: 0.75rem; text-transform: uppercase;">
                     Milestone Progress
                 </p>
-                <div style="display: flex; gap: 1.5rem; min-width: max-content; padding-bottom: 0.5rem;">
-                    {% for day_target, info in [
-                        (7, 'Day 7 Survivor'), (14, 'No Excuse Warrior'), (30, 'Silent Grinder'), 
-                        (60, 'Iron Discipline'), (90, 'Ascended Monk')
+                <div style="display: flex; gap: 1.5rem; min-width: max-content; padding-bottom: 0.5rem; position: relative;">
+                    <!-- Path Background -->
+                    <div class="monk-badge-path"></div>
+                    
+                    {% for day_target, name in [
+                        (7, 'Survivor'), (14, 'Warrior'), (30, 'Grinder'), 
+                        (60, 'Iron Will'), (90, 'Ascended')
                     ] %}
-                    <div class="monk-badge-slot" title="Requirement: Reach Day {{ day_target }}">
-                        <div class="monk-badge-icon locked">🏆</div>
-                        <span style="display: block; font-size: 0.6rem; font-weight: 700; margin-top: 0.5rem; color: #8b92a5;">Day {{ day_target }}</span>
+                    <div class="monk-badge-slot" title="PROTOCOL: Survive {{ day_target }} Days to unlock {{ name }} Badge">
+                        <div class="monk-badge-icon locked" id="badge-day-{{ day_target }}">🏆</div>
+                        <span style="display: block; font-size: 0.6rem; font-weight: 800; margin-top: 0.75rem; color: #8b92a5; text-transform: uppercase; letter-spacing: 0.05em;">Day {{ day_target }}</span>
                     </div>
                     {% endfor %}
                 </div>
