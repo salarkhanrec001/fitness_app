@@ -1,127 +1,296 @@
-/* monk_mode.css — Ultra Premium Dark/Red Elite Theme */
-:root{--monk-bg:rgba(6,8,14,0.75);--monk-surface:rgba(20,23,31,0.55);--monk-border:rgba(255,255,255,0.08);--monk-text:rgba(232,234,240,0.95);--monk-muted:rgba(139,146,165,0.8);--monk-silver:rgba(236,245,255,0.9);--monk-red:rgba(220,38,38,0.85);--monk-red-glow:rgba(220,38,38,0.25);--monk-neon:rgba(0,212,170,0.35);--monk-neon-2:rgba(108,99,255,0.35);--monk-danger:rgba(255,107,107,0.95);--monk-glow:0 0 24px rgba(220,38,38,0.15);--monk-glow-2:0 0 32px rgba(108,99,255,0.16);--monk-shadow:0 18px 60px rgba(0,0,0,0.45);--monk-radius-xl:18px;--monk-radius-lg:14px;--monk-radius-md:12px;--monk-radius-sm:10px;--monk-transition:180ms cubic-bezier(0.2,0.9,0.2,1)}
-.monk-mode-section{margin-top:1rem;background:var(--monk-bg);border:1px solid var(--monk-border);border-radius:var(--monk-radius-xl);padding:1.2rem 1rem;position:relative;overflow:hidden;box-shadow:var(--monk-shadow)}
-.dashboard-wrapper .monk-mode-section{margin-top:0;border:none;background:transparent;box-shadow:none;padding:0}
-.monk-mode-section::before{content:"";position:absolute;inset:-2px;background:radial-gradient(800px 320px at 20% 0%,rgba(220,38,38,0.14),transparent 55%),radial-gradient(700px 280px at 85% 30%,rgba(108,99,255,0.12),transparent 60%);pointer-events:none;opacity:0.9}
-.monk-mode-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;position:relative;z-index:2}
-.monk-mode-title-wrap{display:flex;align-items:center;gap:0.9rem}
-.monk-mode-logo{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:1.25rem;border-radius:14px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);box-shadow:var(--monk-glow)}
-.monk-mode-title-block{display:flex;flex-direction:column;gap:0.15rem}
-.monk-mode-title{margin:0;font-family:var(--font-heading,Outfit);letter-spacing:0.1em;font-weight:900;font-size:1.25rem;color:var(--monk-silver);text-transform:uppercase}
-.monk-mode-subtitle{margin:0;font-size:0.82rem;font-weight:700;color:rgba(220,38,38,0.8)}
-.monk-mode-header-actions{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;justify-content:flex-end}
-.monk-toggle-btn{border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--monk-text);padding:0.5rem 0.9rem;cursor:pointer;transition:transform var(--monk-transition),box-shadow var(--monk-transition);display:inline-flex;align-items:center;gap:0.5rem}
-.monk-toggle-btn:hover{transform:translateY(-2px);box-shadow:var(--monk-glow-2);border-color:rgba(220,38,38,0.3)}
-.monk-sfx-icon{filter:drop-shadow(0 0 8px rgba(220,38,38,0.3))}
-.monk-mode-body{position:relative;z-index:2;margin-top:1rem;display:grid;grid-template-columns:1fr;gap:1rem}
-.monk-cinematic-bg{position:absolute;inset:-40px -20px auto -20px;height:260px;pointer-events:none;z-index:0;opacity:0.95}
-.monk-particles{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(220,38,38,0.2),transparent 40%),radial-gradient(circle at 70% 30%,rgba(108,99,255,0.18),transparent 45%),radial-gradient(circle at 50% 70%,rgba(255,255,255,0.06),transparent 45%);animation:monk-float 7s ease-in-out infinite}
-.monk-smoke{position:absolute;left:-20%;top:40px;width:150%;height:220px;background:radial-gradient(circle at 30% 50%,rgba(220,38,38,0.06),transparent 55%),radial-gradient(circle at 55% 40%,rgba(220,38,38,0.05),transparent 60%);transform:rotate(-8deg);filter:blur(10px);animation:monk-smoke 6.5s ease-in-out infinite}
-@keyframes monk-float{0%{transform:translateY(0);opacity:.85}50%{transform:translateY(-12px);opacity:1}100%{transform:translateY(0);opacity:.85}}
-@keyframes monk-smoke{0%{transform:translateX(0) rotate(-8deg);opacity:.65}50%{transform:translateX(30px) rotate(-5deg);opacity:.92}100%{transform:translateX(0) rotate(-8deg);opacity:.65}}
+/* monk_mode.css — AAA Level Premium "Rebirth" Edition */
+:root {
+  --monk-bg: #050505;
+  --monk-surface: rgba(15, 15, 20, 0.7);
+  --monk-surface-bright: rgba(30, 30, 35, 0.8);
+  --monk-border: rgba(255, 255, 255, 0.08);
+  --monk-red: #ff3c3c;
+  --monk-red-glow: rgba(255, 60, 60, 0.4);
+  --monk-gold: #ffb800;
+  --monk-gold-glow: rgba(255, 184, 0, 0.3);
+  --monk-text: #f0f0f5;
+  --monk-text-muted: #8b92a5;
+  --monk-radius: 20px;
+  --monk-font-heading: 'Outfit', sans-serif;
+  --monk-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-/* Rules Banner */
-.monk-rules-banner{border-radius:var(--monk-radius-xl);background:linear-gradient(135deg,rgba(220,38,38,0.06),rgba(15,10,20,0.4));border:1px solid rgba(220,38,38,0.15);padding:1rem 1.1rem;box-shadow:0 0 30px rgba(220,38,38,0.06)}
-.monk-rules-header-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.65rem}
-.monk-rules-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.25);color:#ef4444;font-size:.72rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
-.monk-rules-subtitle{color:rgba(255,180,180,0.7);font-weight:700;font-size:.82rem}
-.monk-rules-list{display:grid;gap:.4rem}
-.monk-rule-item{display:flex;align-items:center;gap:.6rem;color:rgba(232,234,240,0.82);font-weight:700;font-size:.85rem;padding:.35rem 0}
-.monk-rule-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0;box-shadow:0 0 8px rgba(220,38,38,0.4)}
+/* Base Section Styling */
+.monk-mode-section {
+  position: relative;
+  background: var(--monk-bg);
+  border-radius: var(--monk-radius);
+  overflow: hidden;
+  border: 1px solid var(--monk-border);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8);
+  font-family: 'Inter', sans-serif;
+  color: var(--monk-text);
+}
 
-/* Modal rules */
-.monk-modal-rules{display:grid;gap:.35rem;margin:.75rem 0}
-.monk-modal-rule{color:rgba(255,180,180,0.9);font-weight:700;font-size:.85rem;padding:.2rem 0}
+.monk-mode-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('../monk_mode_premium_bg_1778908070861.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+  z-index: 0;
+  pointer-events: none;
+}
 
-/* Live Panel */
-.monk-live-panel{border-radius:var(--monk-radius-xl);background:rgba(12,14,20,0.35);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);padding:1rem;box-shadow:var(--monk-shadow)}
-.monk-live-top{display:grid;grid-template-columns:1fr;gap:1rem}
-.monk-mission-label{font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,234,240,0.85)}
-.monk-mission-text{font-size:1rem;font-weight:700;color:var(--monk-text);margin-top:.35rem;line-height:1.35}
-.monk-mission-quote{margin-top:.65rem;font-weight:900;color:rgba(220,38,38,0.85);text-shadow:0 0 18px rgba(220,38,38,0.15);letter-spacing:.02em}
-.monk-stats{display:grid;grid-template-columns:1fr;gap:0.9rem}
-.monk-ring-wrap{display:flex;justify-content:flex-start}
-.monk-progress-ring{position:relative;width:132px;height:132px}
-.monk-ring-svg{transform:rotate(-90deg);width:132px;height:132px}
-.monk-ring-bg{fill:none;stroke:rgba(255,255,255,0.07);stroke-width:10}
-.monk-ring-fg{fill:none;stroke:rgba(220,38,38,0.65);stroke-width:10;stroke-dasharray:325;stroke-dashoffset:325;filter:drop-shadow(0 0 18px rgba(220,38,38,0.2));transition:stroke-dashoffset .6s ease}
-.monk-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
-.monk-ring-value{font-family:var(--font-heading,Outfit);font-weight:900;color:var(--monk-silver);font-size:1.35rem}
-.monk-ring-label{margin-top:.1rem;font-size:.75rem;font-weight:800;color:var(--monk-muted);text-transform:uppercase;letter-spacing:.08em}
-.monk-streak-block{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--monk-radius-md);padding:.8rem;display:grid;gap:.15rem}
-.monk-streak-label{font-size:.78rem;color:var(--monk-muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-.monk-streak-value{font-family:var(--font-heading,Outfit);color:rgba(220,38,38,0.9);font-weight:950;font-size:1.55rem;line-height:1.05;filter:drop-shadow(0 0 12px rgba(220,38,38,0.15))}
-.monk-streak-meta{color:rgba(232,234,240,0.68);font-size:.8rem;font-weight:700}
-.monk-days-remaining{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--monk-radius-md);padding:.8rem}
-.monk-days-label{font-size:.78rem;color:var(--monk-muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-.monk-days-value{margin-top:.35rem;font-family:var(--font-heading,Outfit);font-weight:950;color:var(--monk-silver);font-size:1.6rem}
-.monk-days-total{color:rgba(232,234,240,0.7);font-size:1rem;font-weight:800}
-.monk-days-sub{margin-top:.25rem;color:rgba(232,234,240,0.66);font-weight:800;font-size:.85rem}
+/* Glass Layer */
+.monk-glass-overlay {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  background: radial-gradient(circle at top left, rgba(255, 60, 60, 0.05), transparent 40%),
+              radial-gradient(circle at bottom right, rgba(255, 184, 0, 0.03), transparent 40%);
+  backdrop-filter: blur(10px);
+}
 
-/* Tasks */
-.monk-tasks{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:var(--monk-radius-xl);padding:1rem}
-.monk-tasks-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.monk-tasks-title{font-weight:950;color:rgba(232,234,240,0.95);letter-spacing:.04em;font-size:1rem;text-transform:uppercase}
-.monk-tasks-sub{color:rgba(220,38,38,0.7);font-weight:700;font-size:.86rem}
-.monk-task-grid{display:grid;grid-template-columns:1fr;gap:.7rem;margin-top:.9rem}
-.monk-task-item{background:rgba(20,23,31,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:.75rem;transition:transform var(--monk-transition),box-shadow var(--monk-transition),border-color var(--monk-transition)}
-.monk-task-item:hover{transform:translateY(-2px);border-color:rgba(220,38,38,0.2);box-shadow:0 12px 34px rgba(0,0,0,0.26)}
-.monk-checkbox{display:flex;align-items:center;gap:.65rem;cursor:pointer;user-select:none}
-.monk-checkbox input{position:absolute;opacity:0;pointer-events:none}
-.monk-checkbox-ui{width:22px;height:22px;border-radius:7px;border:2px solid rgba(220,38,38,0.3);background:rgba(255,255,255,0.03);display:inline-flex;align-items:center;justify-content:center;transition:transform var(--monk-transition),border-color var(--monk-transition),background var(--monk-transition),box-shadow var(--monk-transition)}
-.monk-task-text{font-weight:900;color:rgba(232,234,240,0.92);font-size:.95rem}
-.monk-task-notes{margin-top:.5rem}
-.monk-task-notes-input{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--monk-text);padding:.55rem .7rem;outline:none;font-weight:700;transition:border-color var(--monk-transition),box-shadow var(--monk-transition)}
-.monk-task-notes-input:focus{border-color:rgba(220,38,38,0.3);box-shadow:0 0 0 3px rgba(220,38,38,0.1)}
-.monk-task-status{margin-top:.55rem;color:rgba(232,234,240,0.75);font-weight:900;font-size:.85rem}
-.monk-task-item:has(.monk-task-checkbox:checked) .monk-checkbox-ui{border-color:rgba(0,212,170,0.65);background:rgba(0,212,170,0.16);box-shadow:0 0 18px rgba(0,212,170,0.2);transform:scale(1.03)}
-.monk-task-item:has(.monk-task-checkbox:checked) .monk-task-status{color:rgba(0,212,170,0.95);text-shadow:0 0 14px rgba(0,212,170,0.14)}
-.monk-task-item:has(.monk-task-checkbox:disabled){opacity:.78;filter:saturate(0.8)}
-.monk-empty{padding:1.1rem .7rem;text-align:center}
-.monk-empty-icon{font-size:2rem;filter:drop-shadow(0 0 14px rgba(220,38,38,0.15))}
-.monk-empty-title{margin-top:.6rem;font-size:1.05rem;font-weight:950;color:rgba(232,234,240,0.95)}
-.monk-empty-text{margin-top:.4rem;color:rgba(139,146,165,0.92);font-weight:700;font-size:.9rem;line-height:1.4}
+/* Header */
+.monk-mode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 5;
+}
 
-/* Actions */
-.monk-actions{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:1rem}
-.monk-legal{display:flex;align-items:center;gap:.6rem;color:rgba(220,38,38,0.7);font-weight:800;font-size:.85rem}
-.monk-legal-dot{width:10px;height:10px;border-radius:999px;background:rgba(220,38,38,0.85);box-shadow:0 0 20px rgba(220,38,38,0.3);animation:monk-legal-pulse 2s ease-in-out infinite}
-@keyframes monk-legal-pulse{0%,100%{box-shadow:0 0 10px rgba(220,38,38,0.2)}50%{box-shadow:0 0 25px rgba(220,38,38,0.5)}}
+.monk-title-block h3 {
+  font-family: var(--monk-font-heading);
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #fff 0%, #888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  line-height: 1;
+}
 
-/* Grid */
-.monk-grid-panel{padding:1rem;border-radius:var(--monk-radius-xl);background:rgba(12,14,20,0.35);border:1px solid rgba(255,255,255,0.08)}
-.monk-grid-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem}
-.monk-grid-title{font-weight:950;color:rgba(232,234,240,0.95);font-size:1rem;letter-spacing:.04em;text-transform:uppercase}
-.monk-grid-badge{margin-left:.6rem;font-size:.75rem;font-weight:950;color:rgba(220,38,38,0.9);text-shadow:0 0 16px rgba(220,38,38,0.15);background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);padding:.18rem .55rem;border-radius:999px}
-.monk-grid-sub{color:rgba(139,146,165,0.92);font-weight:800;font-size:.85rem}
-.monk-grid-scroll{overflow:auto;padding-bottom:.25rem}
-.monk-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.5rem;min-width:720px}
-.monk-day-card{border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);padding:.55rem .4rem;cursor:default;position:relative;transition:transform var(--monk-transition),border-color var(--monk-transition),box-shadow var(--monk-transition);overflow:hidden}
-.monk-day-card:hover{transform:translateY(-2px);border-color:rgba(220,38,38,0.2)}
-.monk-day-top{display:flex;align-items:center;justify-content:space-between;gap:.25rem}
-.monk-day-number{font-weight:950;font-size:.95rem;color:rgba(232,234,240,0.95)}
-.monk-day-icon{font-size:1.05rem}
-.monk-day-state{margin-top:.4rem;font-weight:900;color:rgba(139,146,165,0.92);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
-.monk-day--completed{border-color:rgba(0,212,170,0.35);background:rgba(0,212,170,0.12);box-shadow:0 0 18px rgba(0,212,170,0.18)}
-.monk-day--completed .monk-day-state{color:rgba(0,212,170,0.95);animation:monk-completed-glow 1.8s ease-in-out infinite}
-@keyframes monk-completed-glow{0%{filter:brightness(.96)}50%{filter:brightness(1.16)}100%{filter:brightness(.96)}}
-.monk-day--pending{border-color:rgba(220,38,38,0.3);background:rgba(220,38,38,0.08);box-shadow:0 0 20px rgba(220,38,38,0.1)}
-.monk-day--pending .monk-day-icon{animation:monk-day-pulse 1.2s ease-in-out infinite}
-@keyframes monk-day-pulse{0%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.12);filter:brightness(1.25) drop-shadow(0 0 10px rgba(220,38,38,0.2))}100%{transform:scale(1);filter:brightness(1)}}
-.monk-day--locked{opacity:.58;filter:blur(0.1px) saturate(0.7)}
-.monk-day--ghost{background:rgba(255,255,255,0.02)}
-.monk-tooltip{display:none}
+.monk-title-block p {
+  color: var(--monk-red);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
 
-/* Modal */
-.monk-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.72)}
-.monk-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100vw - 32px));background:rgba(12,14,20,0.92);border:1px solid rgba(220,38,38,0.2);border-radius:22px;padding:1.25rem;box-shadow:0 22px 88px rgba(0,0,0,0.55),0 0 60px rgba(220,38,38,0.08);z-index:2000;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}
-.monk-modal-glow{position:absolute;inset:-2px;background:radial-gradient(circle at 20% 20%,rgba(220,38,38,0.15),transparent 45%),radial-gradient(circle at 80% 30%,rgba(108,99,255,0.12),transparent 45%);pointer-events:none;filter:blur(10px);opacity:.8}
-.monk-modal-content{position:relative}
-.monk-modal-title{font-weight:950;color:rgba(232,234,240,0.95);font-size:1.2rem;letter-spacing:.02em}
-.monk-modal-body{margin-top:.55rem;color:rgba(255,180,180,0.9);font-weight:800}
-.monk-modal-actions{display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap}
-.monk-modal-footer{margin-top:.9rem;color:rgba(232,234,240,0.65);font-weight:800;font-size:.85rem}
+.monk-toggle-btn {
+  position: relative;
+  z-index: 10;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--monk-text);
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  transition: var(--monk-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-/* Responsive */
-@media(max-width:900px){.monk-grid{grid-template-columns:repeat(5,minmax(0,1fr));min-width:600px}.monk-live-top{grid-template-columns:1fr}}
-@media(max-width:600px){.monk-mode-section{padding:1rem .8rem}.monk-grid{grid-template-columns:repeat(4,minmax(0,1fr));min-width:520px}.monk-task-grid{gap:.6rem}}
+/* Premium Cards */
+.premium-card {
+  background: var(--monk-surface);
+  border: 1px solid var(--monk-border);
+  border-radius: var(--monk-radius);
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02),
+              0 15px 45px rgba(0, 0, 0, 0.4);
+  transition: var(--monk-transition);
+  position: relative;
+  z-index: 2;
+}
+
+.premium-card:hover {
+  border-color: rgba(255, 60, 60, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6),
+              0 0 30px rgba(255, 60, 60, 0.05);
+}
+
+/* Rules Ancient Scroll Style */
+.monk-rules-banner {
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--monk-red);
+}
+
+.monk-rules-badge {
+  background: rgba(255, 60, 60, 0.1);
+  color: var(--monk-red);
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255, 60, 60, 0.2);
+}
+
+.monk-rules-list { display: grid; gap: 0.5rem; margin-top: 1rem; }
+.monk-rule-item { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 0.9rem; color: var(--monk-text-muted); }
+.monk-rule-dot { width: 6px; height: 6px; background: var(--monk-red); border-radius: 50%; box-shadow: 0 0 10px var(--monk-red-glow); }
+
+/* Stats Dashboard */
+.monk-stats {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.monk-progress-ring { position: relative; width: 120px; height: 120px; }
+.monk-ring-svg { transform: rotate(-90deg); width: 120px; height: 120px; }
+.monk-ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+.monk-ring-fg { fill: none; stroke: var(--monk-red); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 8px var(--monk-red-glow)); transition: stroke-dashoffset 1s ease; }
+
+.monk-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.monk-ring-center .monk-ring-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 60, 60, 0.3);
+}
+.monk-ring-label { font-size: 0.6rem; font-weight: 800; color: var(--monk-text-muted); letter-spacing: 0.1em; }
+
+.monk-streak-block, .monk-days-remaining {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.monk-streak-value, .monk-days-value {
+  font-size: 2.2rem;
+  font-weight: 950;
+  font-family: var(--monk-font-heading);
+}
+
+/* Task Activation UI */
+.monk-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 14px;
+  margin-bottom: 0.75rem;
+  border: 1px solid transparent;
+  transition: var(--monk-transition);
+}
+
+.monk-task-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.monk-task-item:has(.monk-task-checkbox:checked) {
+  background: rgba(255, 60, 60, 0.05);
+  border-color: rgba(255, 60, 60, 0.2);
+}
+
+.monk-task-text {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--monk-text-muted);
+}
+
+.monk-task-item:has(.monk-task-checkbox:checked) .monk-task-text {
+  color: #fff;
+}
+
+/* Custom Checkbox */
+.monk-checkbox { position: relative; cursor: pointer; display: inline-flex; }
+.monk-task-checkbox { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+.monk-checkbox-ui {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--monk-transition);
+}
+
+.monk-task-checkbox:checked + .monk-checkbox-ui {
+  background: var(--monk-red);
+  border-color: var(--monk-red);
+  box-shadow: 0 0 15px var(--monk-red-glow);
+}
+
+.monk-task-checkbox:checked + .monk-checkbox-ui::after {
+  content: "✓";
+  color: #fff;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+/* Advance Button */
+.monk-complete-day-btn {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ff3c3c, #990000);
+  border: none;
+  color: #fff;
+  font-family: var(--monk-font-heading);
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(255, 60, 60, 0.3);
+  transition: var(--monk-transition);
+  overflow: hidden;
+  display: block;
+}
+
+.monk-complete-day-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 15px 40px rgba(255, 60, 60, 0.5);
+  filter: brightness(1.1);
+}
+
+.monk-complete-day-btn:disabled {
+  background: #222;
+  color: #444;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.monk-complete-day-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: monk-shimmer 3s infinite;
+  pointer-events: none;
+}
+
+@keyframes monk-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive Grid */
+@media (max-width: 768px) {
+  .monk-stats {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .monk-ring-wrap {
+    justify-content: center;
+  }
+}
