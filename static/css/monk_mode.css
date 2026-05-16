@@ -375,3 +375,58 @@
     background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 60, 60, 0.08), transparent 50%),
                 rgba(10, 10, 12, 0.6);
 }
+
+/* --- Badges Hall --- */
+.monk-badges-strip {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.monk-badge-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.monk-badge-icon.locked {
+    filter: grayscale(1) brightness(0.5);
+    opacity: 0.3;
+}
+
+.monk-badge-icon.unlocked {
+    filter: grayscale(0) brightness(1.2);
+    border-color: var(--monk-red);
+    box-shadow: 0 0 20px rgba(255, 60, 60, 0.4);
+    background: radial-gradient(circle, rgba(255, 60, 60, 0.1), transparent);
+}
+
+.monk-minimize-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--monk-text-muted);
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+}
+
+.monk-minimize-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--monk-red);
+    color: #fff;
+}
+
+/* Custom Scrollbar for Badges */
+.monk-badges-strip::-webkit-scrollbar { height: 3px; }
+.monk-badges-strip::-webkit-scrollbar-track { background: transparent; }
+.monk-badges-strip::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }

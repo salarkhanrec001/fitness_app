@@ -20,6 +20,24 @@
         </header>
 
         <div class="monk-mode-body">
+            <!-- --- Hall of Badges (Horizontal Scroll) --- -->
+            <div class="monk-badges-strip premium-card" style="margin-bottom: 1.5rem; padding: 1rem; overflow-x: auto;">
+                <p style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--monk-red); margin-bottom: 0.75rem; text-transform: uppercase;">
+                    Milestone Progress
+                </p>
+                <div style="display: flex; gap: 1.5rem; min-width: max-content; padding-bottom: 0.5rem;">
+                    {% for day_target, info in [
+                        (7, 'Day 7 Survivor'), (14, 'No Excuse Warrior'), (30, 'Silent Grinder'), 
+                        (60, 'Iron Discipline'), (90, 'Ascended Monk')
+                    ] %}
+                    <div class="monk-badge-slot" title="Requirement: Reach Day {{ day_target }}">
+                        <div class="monk-badge-icon locked">🏆</div>
+                        <span style="display: block; font-size: 0.6rem; font-weight: 700; margin-top: 0.5rem; color: #8b92a5;">Day {{ day_target }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="premium-card monk-rules-banner">
                 <div class="monk-rules-header-row">
                     <span class="monk-rules-badge">IRON RULES</span>
@@ -60,19 +78,24 @@
                 </div>
 
                 <div class="premium-card monk-tasks" style="margin-top: 1.5rem;">
-                    <div class="monk-tasks-header">
-                        <h4 class="monk-tasks-title">Daily Contracts</h4>
-                        <span class="monk-tasks-sub" id="monk-tasks-remaining">PENDING</span>
+                    <div class="monk-tasks-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 class="monk-tasks-title">Daily Contracts</h4>
+                            <span class="monk-tasks-sub" id="monk-tasks-remaining">PENDING</span>
+                        </div>
+                        <button class="monk-minimize-btn" id="monk-tasks-toggle">MINIMIZE</button>
                     </div>
                     
-                    <div class="monk-task-grid" id="monk-task-grid">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div class="monk-task-container" id="monk-task-container">
+                        <div class="monk-task-grid" id="monk-task-grid">
+                            <!-- Populated by JS -->
+                        </div>
 
-                    <div class="monk-actions" style="margin-top: 1.5rem;">
-                        <button class="monk-complete-day-btn" id="monk-complete-day-btn">
-                            FINALIZE CURRENT STAGE
-                        </button>
+                        <div class="monk-actions" style="margin-top: 1.5rem;">
+                            <button class="monk-complete-day-btn" id="monk-complete-day-btn">
+                                FINALIZE CURRENT STAGE
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -104,6 +104,26 @@
     setTimeout(() => rootEl?.classList.remove("monk-glitch-active"), 200);
   }
 
+  // --- Task Collapse System ---
+  function initTaskToggle() {
+    const btn = qs("#monk-tasks-toggle");
+    const container = qs("#monk-task-container");
+    if (!btn || !container) return;
+
+    const saved = localStorage.getItem("monk-tasks-collapsed") === "1";
+    if (saved) {
+      container.style.display = "none";
+      btn.textContent = "EXPAND";
+    }
+
+    btn.onclick = () => {
+      const isHidden = container.style.display === "none";
+      container.style.display = isHidden ? "block" : "none";
+      btn.textContent = isHidden ? "MINIMIZE" : "EXPAND";
+      localStorage.setItem("monk-tasks-collapsed", isHidden ? "0" : "1");
+    };
+  }
+
   async function apiPost(url, body) {
     const res = await fetch(url, {
       method: "POST",
@@ -167,7 +187,6 @@
       if (titleEl && data.mission_focus) titleEl.textContent = data.mission_focus.toUpperCase();
       if (quoteEl && data.protocol_quote) quoteEl.textContent = data.protocol_quote;
       
-      // Update Rank Badge & Color
       if (rankBadge && data.rank_title) {
         rankBadge.textContent = data.rank_title.toUpperCase();
         const colors = { "Initiate": "#ff3c3c", "Iron Will": "#ffb800", "Ascended": "#ffd700" };
@@ -184,6 +203,24 @@
       }
       if (streakEl) streakEl.textContent = data.streak;
       if (currentDayEl && data.today) currentDayEl.textContent = data.today.day_index || 1;
+
+      // Update Badge Strip
+      const badgeSlots = qsa(".monk-badge-slot");
+      badgeSlots.forEach(slot => {
+        const title = slot.getAttribute("title");
+        const match = title.match(/Reach Day (\d+)/);
+        if (match) {
+          const target = parseInt(match[1]);
+          const icon = qs(".monk-badge-icon", slot);
+          if (data.streak >= target) {
+            icon?.classList.remove("locked");
+            icon?.classList.add("unlocked");
+            slot.style.opacity = "1";
+          } else {
+            slot.style.opacity = "0.4";
+          }
+        }
+      });
 
       const taskGrid = qs("#monk-task-grid");
       if (taskGrid && data.tasks) {
@@ -256,6 +293,7 @@
     initSfxToggle();
     initParticles();
     initMouseTracking();
+    initTaskToggle();
     initFinalize();
     initCheckboxes();
     refreshStats();
