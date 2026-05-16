@@ -160,11 +160,20 @@
       const ringFill = qs("#monk-ring-fill");
       const streakEl = qs("#monk-streak-val");
       const currentDayEl = qs("#monk-current-day");
+      const rankBadge = qs("#monk-rank-badge");
       const titleEl = qs(".monk-title-block p");
       const quoteEl = qs(".monk-rules-subtitle");
 
       if (titleEl && data.mission_focus) titleEl.textContent = data.mission_focus.toUpperCase();
       if (quoteEl && data.protocol_quote) quoteEl.textContent = data.protocol_quote;
+      
+      // Update Rank Badge & Color
+      if (rankBadge && data.rank_title) {
+        rankBadge.textContent = data.rank_title.toUpperCase();
+        const colors = { "Initiate": "#ff3c3c", "Iron Will": "#ffb800", "Ascended": "#ffd700" };
+        rankBadge.style.color = colors[data.rank_title] || "#ff3c3c";
+        rankBadge.style.textShadow = `0 0 15px ${colors[data.rank_title]}88`;
+      }
 
       if (percentEl && data.level) {
         percentEl.textContent = `${data.level.progress_percent}%`;

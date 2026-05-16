@@ -649,6 +649,14 @@ def status():
         ]
         protocol_quote = quotes[min((progress.current_day - 1) // 10, 8)]
 
+        # Determine Rank Title
+        if progress.current_day <= 30:
+            rank_title = "Initiate"
+        elif progress.current_day <= 75:
+            rank_title = "Iron Will"
+        else:
+            rank_title = "Ascended"
+
         today_day = MonkModeDay.query.filter_by(progress_id=progress.id, day_index=progress.current_day).first()
         current_tasks = MonkModeTask.query.filter_by(progress_id=progress.id, day_index=progress.current_day).all() if today_day else []
 
@@ -660,6 +668,7 @@ def status():
                 "streak": progress.streak,
                 "mission_focus": mission_focus,
                 "protocol_quote": protocol_quote,
+                "rank_title": rank_title,
                 "today": {"day_index": today_day.day_index if today_day else None, "status": today_day.status if today_day else None},
                 "tasks": [
                     {"task_key": t.task_key, "status": t.status, "completed_at": t.completed_at.isoformat() if t.completed_at else None}
